@@ -1,0 +1,28 @@
+Axon tool download/edit/push etc ...
+editor :
+1) basic parsing, check variables and methods exit
+2) check methods params match context (is there such a thing)
+1B) Or call real axon parser / compiler on save and highlight errors
+check tags used exits (haystack)
+
+-> Do this for axon first
+
+ScanForUsingsAndTypes -> gives me available types
+
+set scope per document index ie : [char 128 to char 242] ?
+or rather glue them to proper type def (global, class, slot, closure)
+
+quick scan:
+- each class -> if inheritance, fetch inherited types from index and had to scope
+ - each fields -> :=  store the type for each field (no inference needed on fields), warn if errors, add to scope
+ - each slot ->
+    -check params types are know and add to scope
+    - each closure -> check params types and add to scope
+    - local local type defs(assignment) -> juts store var name but no inference yet
+
+whole document check for assignment (=) that we know that variable (in scope)
+warn of overriding (same var already assigned in scope)
+
+show errors/warning in editor (wayvy lines with tooltip?)
+
+
