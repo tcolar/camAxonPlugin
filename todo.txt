@@ -1,10 +1,6 @@
 TODO: explain sync button [?]
 TODO: Toogle help pane to axon mode somehow -> (trio docs ?)
-TODO: Eval shell to run queries and a way to see results grid/zync ... limit # of results
-
-todo": not strart doc esrver if already running .... or run on available port
-
-try to make sync stuff asynchronous ... and show res ults when available
+TODO: Eval shell history
 
 TODO: Deal with delete/rename -> replace standrad item popups ?
 -> ask user whether only local or remote too

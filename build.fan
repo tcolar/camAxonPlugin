@@ -13,8 +13,10 @@ class Build : BuildPod
                "fwt 1.0",
                "skyspark 1.0+",
                "folio 1.0+",
+               "fresco 1.0+",
                "camembert 1.0.9+",
-               "netColarUtils 1.0.0+"]
+               "netColarUtils 1.0.0+",
+               "netColarUI 1.0.0+"]
     srcDirs = [`fan/`]
     resDirs = [`res/`]
     meta    = ["license.name" : "Commercial / TBD",

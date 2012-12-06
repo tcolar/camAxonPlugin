@@ -80,8 +80,10 @@ const class AxonSpace : Space
     frame.history.push(this, Item(file))
     evalText := Text
     {
-            it.text = "Eval ....."
+      data := AxonActorData {action=AxonActorAction.evalLast}
+      it.text = (Str) syncActor.send(data).get
     }
+    evalText.onKeyUp.add |Event e| {evalKeyUp(e, evalText)}
     evalText.onAction.add |e| {eval(evalText.text)}
     return EdgePane
     {
@@ -102,7 +104,7 @@ const class AxonSpace : Space
         EdgePane
         {
           center = View.makeBest(frame, file)
-          bottom = evalText
+          bottom = EdgePane{left = Label{it.text="Eval:"}; center = evalText}
         },
       }
     }
@@ -151,29 +153,23 @@ const class AxonSpace : Space
     if(pass == null)
       return // cancelled
 
-    result := syncActor.send(["run", pass]).get
-    if(result!=null && result.typeof.fits(Err#))
-    {
-      e := (Err)result
-      Dialog.openWarn(sys.frame, e.toStr, e)
-    }
-    else
-    {
-      sys.frame.reload
-    }
+    data := AxonActorData {action=AxonActorAction.sync; password=pass}
+    result := syncActor.send(data).get
+    showActorResults(result)
+    sys.frame.reload
   }
 
   ** Run an eval on the server and show the results
+  ** TODO: run async ... but UI refresh are tricky (Not on UI thread business)
   Void eval(Str toEval)
   {
     pass := getPass
     if(pass == null)
       return // cancelled
-    result := (Result) syncActor.send(["eval", pass, toEval]).get->val
-    // todo: check for errors (might be Err and not result)
-    // toto: if no error show table
+
+    data := AxonActorData {action=AxonActorAction.eval; password=pass; it.eval=toEval}
+    showActorResults(syncActor.send(data).get)
     // todo: allow/implement up and down arrows in eval field
-    result.get.dump
   }
 
   ** Get the connection password. Ask user for it if we don't have it yet
@@ -181,9 +177,53 @@ const class AxonSpace : Space
   Str? getPass()
   {
     Str? pass := ""
-    if(syncActor.send(["needsPassword"]).get == true)
+    data := AxonActorData {action=AxonActorAction.needsPassword; password=pass}
+    result := syncActor.send(data).get
+    showActorResults(result, true)
+    if(result == true)
       pass = Dialog.openPromptStr(sys.frame, "Password for project $dir.name:")
     return pass
+  }
+
+  ** Dispplay call results to user
+  Void showActorResults(Obj? result, Bool errorOnly := false)
+  {
+    if(result == null) return
+    if(errorOnly && ! (result is Err)) return
+
+    if(result is Unsafe)
+      showActorResults((result as Unsafe).val)
+    else if(result is Result)
+      showActorResults((result as Result).get)
+    else if(result is Err)
+    {
+      e := result as Err
+      Dialog.openWarn(sys.frame, e.toStr, e)
+    }
+    else if(result is Grid)
+    {
+      g := result as Grid
+      meta := g.meta
+      if(meta.has("errTrace"))
+        Dialog.openWarn(sys.frame, meta["dis"], meta["errTrace"])
+      else
+        FolioGridDisplayer(g, sys.frame).open
+    }
+  }
+
+  ** Provides eval history navigation
+  Void evalKeyUp(Event event, Text eval)
+  {
+    if(event.key == Key.up)
+    {
+      data := AxonActorData {action=AxonActorAction.evalUp}
+      eval.text = (Str) syncActor.send(data).get
+    }
+    if(event.key == Key.down)
+    {
+      data := AxonActorData {action=AxonActorAction.evalDown}
+      eval.text = (Str) syncActor.send(data).get
+    }
   }
 }
 
