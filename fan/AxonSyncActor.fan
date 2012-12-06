@@ -46,6 +46,9 @@ const class AxonSyncActor : Actor
 
       conn := (AxonConn) Actor.locals["camAxon.conn"]
 
+      if(action=="eval")
+        return Unsafe(conn.client.eval(data[2]))
+
       if(Actor.locals.containsKey("camAxon.data"))
         items = (Str:AxonSyncItem) Actor.locals["camAxon.data"]
 

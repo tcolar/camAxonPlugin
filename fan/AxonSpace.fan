@@ -78,6 +78,11 @@ const class AxonSpace : Space
   override Widget onLoad(Frame frame)
   {
     frame.history.push(this, Item(file))
+    evalText := Text
+    {
+            it.text = "Eval ....."
+    }
+    evalText.onAction.add |e| {eval(evalText.text)}
     return EdgePane
     {
       left = InsetPane(0, 5, 0, 5)
@@ -92,7 +97,14 @@ const class AxonSpace : Space
           center = makeFileNav(frame)
         },
       }
-      center = InsetPane(0, 5, 0, 0) { View.makeBest(frame, file), }
+      center = InsetPane(0, 5, 0, 0)
+      {
+        EdgePane
+        {
+          center = View.makeBest(frame, file)
+          bottom = evalText
+        },
+      }
     }
   }
 
@@ -132,14 +144,12 @@ const class AxonSpace : Space
     }
   }
 
+  ** Sync the local project with the server
   Void sync()
   {
-    Str? pass := ""
-    if(syncActor.send(["needsPassword"]).get == true)
-      pass = Dialog.openPromptStr(sys.frame, "Password for project $dir.name:")
-
+    pass := getPass
     if(pass == null)
-      return
+      return // cancelled
 
     result := syncActor.send(["run", pass]).get
     if(result!=null && result.typeof.fits(Err#))
@@ -153,9 +163,27 @@ const class AxonSpace : Space
     }
   }
 
-  override Void onUnload()
+  ** Run an eval on the server and show the results
+  Void eval(Str toEval)
   {
-    syncActor.pool.stop
+    pass := getPass
+    if(pass == null)
+      return // cancelled
+    result := (Result) syncActor.send(["eval", pass, toEval]).get->val
+    // todo: check for errors (might be Err and not result)
+    // toto: if no error show table
+    // todo: allow/implement up and down arrows in eval field
+    result.get.dump
+  }
+
+  ** Get the connection password. Ask user for it if we don't have it yet
+  ** Returns null if cancel was pressed on dialog
+  Str? getPass()
+  {
+    Str? pass := ""
+    if(syncActor.send(["needsPassword"]).get == true)
+      pass = Dialog.openPromptStr(sys.frame, "Password for project $dir.name:")
+    return pass
   }
 }
 
