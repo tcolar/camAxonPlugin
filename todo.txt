@@ -1,3 +1,6 @@
+TODO: explain sync button [?]
+TODO: About menu / window -> tcolar / status302
+
 Axon tool download/edit/push etc ...
 editor :
 1) basic parsing, check variables and methods exit

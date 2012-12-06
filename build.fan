@@ -16,7 +16,7 @@ class Build : BuildPod
                "camembert 1.0.9+",
                "netColarUtils 1.0.0+"]
     srcDirs = [`fan/`]
-    resDirs = [,]
+    resDirs = [`res/`]
     meta    = ["license.name" : "TBD",
                 "org.name"   : "Status 302 LLC",
                 "camembert.plugin" : "AxonPlugin"]

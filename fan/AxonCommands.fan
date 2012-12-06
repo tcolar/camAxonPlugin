@@ -50,10 +50,13 @@ const class NewAxonPrj : Cmd
       it.user = user.text
     }
 
-    conn.save(File(destDir+`axon_conn.props`))
+    f := File(destDir + AxonConn.fileName)
 
-    grid := conn.sync(frame)
-    grid?.each |row| {echo("Row: $row")}
+    conn.save(f)
+
+    item := AxonSpace.axonItem(f)
+
+    frame.goto(item, true)
   }
 
   new make(|This| f) {f(this)}
