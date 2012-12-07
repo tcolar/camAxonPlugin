@@ -18,7 +18,6 @@ const class AxonSyncActor : Actor
   }
 
   ** Sync from/to server
-  ** Returns the Err in case of error, null otherwise
   override Obj? receive(Obj? obj)
   {
     data := (AxonActorData) obj
@@ -129,7 +128,7 @@ const class AxonSyncActor : Actor
       }
     }
 
-    // todo: push new files
+    // Push new files
     conn.dir.list.each |f|
     {
       if(f.ext == "axon")

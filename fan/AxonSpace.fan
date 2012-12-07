@@ -112,7 +112,7 @@ const class AxonSpace : Space
 
   private Widget makeFileNav(Frame frame)
   {
-    items := [Item(dir)]
+    items := [,]
     findItems(dir, items)
     list := ItemList(frame, items, 280)
     items.eachWhile |item, index -> Bool?|

@@ -1,6 +1,10 @@
-TODO: explain sync button [?]
-TODO: Toogle help pane to axon mode somehow -> (trio docs ?)
-TODO: Eval shell history
+- explain sync button [?]
+- command for sync with shortcut + in menu
+- sync manually / sync on changes / poll server ? conn.props: syncServerEvery, SyncOnSave etc ....
+- Toogle help pane to axon mode somehow -> (index trio docs ?)
+- Reload conn in menu (after editing conn file)
 
-TODO: Deal with delete/rename -> replace standrad item popups ?
--> ask user whether only local or remote too
+- Deal with delete/rename -> replace standrad item popups ?
+  -> ask user whether only local or remote too
+
+- Icons for synchronize / open in editor instead of those ugly buttons

@@ -14,7 +14,6 @@ const class NewAxonPrj : Cmd
     Text project := Text()
     Text host := Text()
     Text user := Text()
-    Text password := Text {it.password = true}
 
     dirs := frame.sys.options.srcDirs
     dir := dirs.isEmpty ? Env.cur.homeDir.pathStr : File(dirs[0]).pathStr
@@ -32,7 +31,6 @@ const class NewAxonPrj : Cmd
         Label{text="Host:"}, host,
         Label{text="Project Name:"}, project,
         Label{text="User:"}, user,
-        Label{text="Password:"}, password,
       }
     }
 
@@ -45,7 +43,6 @@ const class NewAxonPrj : Cmd
     {
       it.dir = destDir.toFile
       it.host = host.text
-      it.password = password.text
       it.project = project.text
       it.user = user.text
     }
