@@ -29,7 +29,7 @@ const class AxonSpace : Space
     syncActor = acts.forProject(dir)
   }
 
-  static const Image funcIcon := Image(`fan://camAxonPlugin/res/func.png`)
+  static const Image funcIcon := Image(`fan://icons/x16/func.png`)
 
   ** Project name
   const Str name

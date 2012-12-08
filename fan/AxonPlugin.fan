@@ -39,4 +39,10 @@ const class AxonPlugin : Plugin
     AxonActors act := actors.val
     act.actors.vals.each |a| {a.pool.stop}
   }
+
+  ** Called via Dynamic call
+  Str:TrioInfo trioData(File[] podDirs)
+  {
+    AxonIndexer().trioData(podDirs)
+  }
 }
