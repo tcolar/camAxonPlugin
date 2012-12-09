@@ -180,8 +180,11 @@ const class AxonActorData
   {
     if(callback != null)
     {
-       cb := (|Obj?|) callback.val
-       cb.call(results)
+      cb := (|Obj?|) callback.val
+      Desktop.callAsync |->|
+      {
+        cb.call(results)
+      }
     }
   }
 }

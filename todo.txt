@@ -3,10 +3,8 @@
 - sync manually / sync on changes / poll server ? conn.props: syncServerEvery, SyncOnSave etc ....
 - Reload conn commad in menu (after editing conn file)
 
-- help pane: toogle enable fantom docs, toogle enable axon docs -> add trio docs/src
-
 - Deal with delete/rename -> replace standard item popups ?
   -> ask user whether only local or remote too
 
-- Icons for synchronize / open in editor etc ... instead of those ugly buttons
+- Icons for synchronize etc ...
 

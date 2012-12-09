@@ -11,7 +11,7 @@ const class AxonPlugin : Plugin
 
   override Void onFrameReady(Frame frame)
   {
-    frame.menuBar.add(AxonMenu(frame))
+    (frame.menuBar as MenuBar).plugins.add(AxonMenu(frame))
   }
 
   override Space? createSpace(Sys sys, File file)
