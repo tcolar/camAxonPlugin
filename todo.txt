@@ -1,7 +1,3 @@
-- explain sync button [?]
-
-- Icons for sync / auto sync toogle / edit file
-
 - Deal with delete/rename -> replace standard item popups ?
   -> ask user whether only local or remote too
 
