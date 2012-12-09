@@ -177,7 +177,7 @@ const class AxonSyncActor : Actor
   ** Log to a file in the project for debugging / trcaing
   Void log(Str msg)
   {
-     File log := projectFolder + `sync.log`
+     File log := projectFolder + `_sync.log`
      // if file is old start over
      if(log.exists && DateTime.now - log.modified > 1hr)
       log.delete

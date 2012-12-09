@@ -26,7 +26,7 @@ class AxonConn
 
   @Transient File? dir // where this Conn is stored / synced too
 
-  @Transient static const Uri fileName := `axon_conn.props`
+  @Transient static const Uri fileName := `_axon_conn.props`
 
   new make(|This| f) {f(this)}
 
