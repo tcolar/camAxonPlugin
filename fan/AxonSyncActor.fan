@@ -41,51 +41,68 @@ const class AxonSyncActor : Actor
       {
         return AxonEvalStack.read.down
       }
-      else
+      if(action == AxonActorAction.autoStatus)
       {
-        // Actions that need a connection
-        connect(data.password)
-
-        conn := (AxonConn) Actor.locals["camAxon.conn"]
-
-        switch(action)
-        {
-          case(AxonActorAction.eval):
-            AxonEvalStack.read.append(data.eval)
-            result := Unsafe(conn.client.eval(data.eval))
-            doCallback(data, result)
-            return result
-
-          case(AxonActorAction.sync):
-            sync(conn)
-            doCallback(data, null)
+        return Actor.locals.containsKey("camAxon.auto")
+      }
+      if(action == AxonActorAction.autoOn)
+      {
+            Actor.locals["camAxon.auto"] = true
+            log("Auto sync -> on")
             return null
+      }
+      if(action == AxonActorAction.autoOff)
+      {
+            Actor.locals.remove("camAxon.auto")
+            log("Auto sync -> off")
+            return null
+      }
 
-          default:
-            throw Err("Unexpected action: $action !")
-        }
+     // else
+
+      // Actions that need a connection
+      connect(data.password)
+
+      conn := (AxonConn) Actor.locals["camAxon.conn"]
+
+      switch(action)
+      {
+        case(AxonActorAction.eval):
+          log("Eval: $data.eval")
+          AxonEvalStack.read.append(data.eval)
+          result := Unsafe(conn.client.eval(data.eval))
+          return result
+
+        case(AxonActorAction.sync):
+          sync(conn)
+          if(Actor.locals.containsKey("camAxon.auto"))
+            sendLater(2sec, obj) // autosync
+          return null
+
+        default:
+          throw Err("Unexpected action: $action !")
       }
     }
     catch(Err e)
     {
       e.trace
-      doCallback(data, e)
+      log("Error: $e.traceToStr")
       return Err("Server communication error !", e)
     }
-    doCallback(data, null)
     return null
   }
 
-  Void doCallback(AxonActorData data, Obj? obj)
+  /*Void doCallback(AxonActorData data, Obj? obj)
   {
     data.runCallback(obj)
-  }
+  }*/
 
   ** Connects the client (if not already connected)
   Void connect(Str password)
   {
    if(! Actor.locals.containsKey("camAxon.conn"))
     {
+      log("Connecting...")
       Actor.locals.remove("camAxon.data")
       c := AxonConn.load(projectFolder + AxonConn.fileName)
       c.password = password
@@ -122,7 +139,7 @@ const class AxonSyncActor : Actor
       // new or updated file
       if( ! items.containsKey(r->name) || r->mod > items[r->name].remoteTs)
       {
-        echo("Pulling from sever : $f")
+        log("Pulling from sever : $f")
         f.out.print(r->src).close
         items[r->name] = AxonSyncItem {it.file = f.osPath; it.localTs = f.modified; it.remoteTs = r->mod}
       }
@@ -136,7 +153,7 @@ const class AxonSyncActor : Actor
         r := grid.find |row| {row->name == f.basename}
         if(r==null ||  f.modified > items[f.basename].localTs)
         {
-          echo("Sending to server : $f")
+          log("Sending to server : $f")
 
           src  := f.readAllStr
           expr := "commit(diff(read(func and name==$f.basename.toCode), {src: $src.toCode}))"
@@ -155,6 +172,24 @@ const class AxonSyncActor : Actor
     if(! Actor.locals.containsKey("camAxon.evalStack"))
       Actor.locals["camAxon.evalStack"] = AxonEvalStack()
     return Actor.locals["camAxon.evalStack"]
+  }
+
+  ** Log to a file in the project for debugging / trcaing
+  Void log(Str msg)
+  {
+     File log := projectFolder + `sync.log`
+     // if file is old start over
+     if(log.exists && DateTime.now - log.modified > 1hr)
+      log.delete
+     if(! log.exists)
+      log.create
+     out := log.out(true)
+     try
+       out.printLine("${DateTime.now.toLocale} - $msg")
+     catch(Err e)
+      e.trace
+     finally
+      out.close
   }
 }
 
@@ -192,7 +227,8 @@ const class AxonActorData
 ** SyncActor Actions enum
 enum class AxonActorAction
 {
-  needsPassword, sync, eval, evalUp, evalDown, evalLast
+  needsPassword, sync, eval, evalUp, evalDown, evalLast,
+  autoOn, autoOff, autoStatus
 }
 
 **************************************************************************

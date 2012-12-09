@@ -1,10 +1,8 @@
 - explain sync button [?]
-- command for sync with shortcut + in menu
-- sync manually / sync on changes / poll server ? conn.props: syncServerEvery, SyncOnSave etc ....
-- Reload conn commad in menu (after editing conn file)
+
+- Icons for sync / auto sync toogle / edit file
 
 - Deal with delete/rename -> replace standard item popups ?
   -> ask user whether only local or remote too
 
-- Icons for synchronize etc ...
 

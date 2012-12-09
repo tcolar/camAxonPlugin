@@ -30,6 +30,7 @@ const class AxonSpace : Space
   }
 
   static const Image funcIcon := Image(`fan://icons/x16/func.png`)
+  static const Image syncIcon := Image(`fan://icons/x16/sync.png`)
 
   ** Project name
   const Str name
@@ -91,10 +92,26 @@ const class AxonSpace : Space
       {
         EdgePane
         {
-          top = Button
+          top = EdgePane
           {
-            it.text = "Synchronize"
-            it.onAction.add |e| {sync}
+            left = Button
+            {
+              it.image = syncIcon
+              it.onAction.add |e| {sync}
+            }
+            right = /*GridPane
+            {
+              numCols = 2*/
+              Button
+              {
+                // TODO: set selected according to Cur Status of actor
+                it.selected = autoStatus()
+                it.text = "AutoSync"
+                it.mode = ButtonMode.toggle
+                it.onAction.add |e| {autoSync()}
+              }/*,
+              Label{image = syncIcon},
+            }*/
           }
           center = makeFileNav(frame)
         },
@@ -146,6 +163,23 @@ const class AxonSpace : Space
     }
   }
 
+  ** Enable / disable autosync
+  Void autoSync()
+  {
+    on := autoStatus()
+    if( ! on)
+    {
+      data := AxonActorData {action=AxonActorAction.autoOn}
+      result := syncActor.send(data).get
+      sync // kick off sync
+    }
+    else
+    {
+      data := AxonActorData {action=AxonActorAction.autoOff}
+      result := syncActor.send(data).get
+    }
+  }
+
   ** Sync the local project with the server
   Void sync()
   {
@@ -153,10 +187,16 @@ const class AxonSpace : Space
     if(pass == null)
       return // cancelled
 
-    data := AxonActorData {action=AxonActorAction.sync; password=pass}
+    data := AxonActorData {action=AxonActorAction.sync; password=pass; }
     result := syncActor.send(data).get
     showActorResults(result)
     sys.frame.reload
+  }
+
+  Bool autoStatus()
+  {
+    data := AxonActorData {action=AxonActorAction.autoStatus}
+    return (Bool) syncActor.send(data).get
   }
 
   ** Run an eval on the server and show the results
