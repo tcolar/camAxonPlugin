@@ -18,7 +18,7 @@ class Build : BuildPod
                "netColarUtils 1.0.0+",
                "netColarUI 1.0.0+"]
     srcDirs = [`fan/`]
-    resDirs = [`res/`]
+    resDirs = [,]
     meta    = ["license.name" : "Commercial / TBD",
                 "org.name"   : "Status 302 LLC",
                 "camembert.plugin" : "AxonPlugin"]
