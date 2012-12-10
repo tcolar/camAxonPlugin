@@ -36,7 +36,7 @@ const class NewAxonPrj : Cmd
 
     if (Dialog.ok != dialog.open) return
 
-    destDir := Uri(folder.text).plusSlash.plusName(project.text, true)
+    destDir := File.os(folder.text).normalize.uri.plusSlash.plusName(project.text, true)
     FileUtils.mkDirs(destDir)
 
     conn := AxonConn
