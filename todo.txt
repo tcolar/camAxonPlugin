@@ -1,4 +1,9 @@
 - Deal with delete/rename -> replace standard item popups ?
   -> ask user whether only local or remote too
 
+save results of grid results
+run query async and show spinner, then whne done show green or red bulb, click to see results
+
+import project/history into local instance ?
+
 

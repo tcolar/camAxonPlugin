@@ -51,7 +51,7 @@ const class NewAxonPrj : Cmd
 
     conn.save(f)
 
-    item := AxonSpace.axonItem(f)
+    item := AxonItem.fromFile(f)
 
     frame.goto(item, true)
   }

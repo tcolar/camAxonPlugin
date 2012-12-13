@@ -30,7 +30,7 @@ const class AxonPlugin : Plugin
   override Item? projectItem(File dir, Int indent)
   {
     if(dir.isDir && dir.plus(AxonConn.fileName).exists)
-      return AxonSpace.axonItem(dir)
+      return AxonItem.fromFile(dir)
     return null
   }
 

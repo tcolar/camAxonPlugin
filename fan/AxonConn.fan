@@ -51,4 +51,6 @@ class AxonConn
     conn.dir = from.parent
     return conn
   }
+
+  override Str toStr() {"${user}@http://$host/api/$project"}
 }

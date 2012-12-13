@@ -3,6 +3,7 @@
 
 using concurrent
 using fwt
+using camembert
 
 **
 ** AxonSyncActor
@@ -20,100 +21,110 @@ const class AxonSyncActor : Actor
   ** Sync from/to server
   override Obj? receive(Obj? obj)
   {
-    data := (AxonActorData) obj
+    AxonActorData? data
     try
     {
-      action := data.action
-
-      if(action == AxonActorAction.needsPassword)
-      {
-        return ! Actor.locals.containsKey("camAxon.conn")
-      }
-      if(action == AxonActorAction.evalLast)
-      {
-        return AxonEvalStack.read.items.peek
-      }
-      if(action == AxonActorAction.evalUp)
-      {
-        return AxonEvalStack.read.up
-      }
-      if(action == AxonActorAction.evalDown)
-      {
-        return AxonEvalStack.read.down
-      }
-      if(action == AxonActorAction.autoStatus)
-      {
-        return Actor.locals.containsKey("camAxon.auto")
-      }
-      if(action == AxonActorAction.autoOn)
-      {
-            Actor.locals["camAxon.auto"] = true
-            log("Auto sync -> on")
-            return null
-      }
-      if(action == AxonActorAction.autoOff)
-      {
-            Actor.locals.remove("camAxon.auto")
-            log("Auto sync -> off")
-            return null
-      }
-
-     // else
-
-      // Actions that need a connection
-      connect(data.password)
-
-      conn := (AxonConn) Actor.locals["camAxon.conn"]
-
-      switch(action)
-      {
-        case(AxonActorAction.eval):
-          log("Eval: $data.eval")
-          AxonEvalStack.read.append(data.eval)
-          result := Unsafe(conn.client.eval(data.eval))
-          return result
-
-        case(AxonActorAction.sync):
-          sync(conn)
-          if(Actor.locals.containsKey("camAxon.auto"))
-            sendLater(2sec, obj) // autosync
-          return null
-
-        default:
-          throw Err("Unexpected action: $action !")
-      }
+      data = (AxonActorData) obj
+      result := doReceive(data)
+      data.runCallback(result)
+      return result
     }
     catch(Err e)
     {
-      e.trace
-      log("Error: $e.traceToStr")
-      return Err("Server communication error !", e)
+      log(e, data)
+      return e
     }
     return null
   }
 
-  /*Void doCallback(AxonActorData data, Obj? obj)
+  Obj? doReceive(AxonActorData data)
   {
-    data.runCallback(obj)
-  }*/
+    action := data.action
+
+    if(action == AxonActorAction.needsPassword)
+    {
+      return ! Actor.locals.containsKey("camAxon.conn")
+    }
+    if(action == AxonActorAction.evalLast)
+    {
+      return AxonEvalStack.read.items.peek
+    }
+    if(action == AxonActorAction.evalUp)
+    {
+      return AxonEvalStack.read.up
+    }
+    if(action == AxonActorAction.evalDown)
+    {
+      return AxonEvalStack.read.down
+    }
+    if(action == AxonActorAction.autoStatus)
+    {
+      return Actor.locals.containsKey("camAxon.auto")
+    }
+    if(action == AxonActorAction.autoOn)
+    {
+      Actor.locals["camAxon.auto"] = true
+      return null
+    }
+    if(action == AxonActorAction.autoOff)
+    {
+      Actor.locals.remove("camAxon.auto")
+      return null
+    }
+
+    // Actions that need a connection
+    connect(data.password, data)
+
+    conn := (AxonConn) Actor.locals["camAxon.conn"]
+
+    switch(action)
+    {
+      case(AxonActorAction.eval):
+        log("Eval: $data.eval", data)
+        AxonEvalStack.read.append(data.eval)
+        result := Unsafe(conn.client.eval(data.eval))
+        return result
+
+      case(AxonActorAction.sync):
+        auto := Actor.locals.containsKey("camAxon.auto")
+        try
+          sync(conn, data)
+        catch(Err syncErr)
+        {
+          log(syncErr, data)
+          if(! auto) throw syncErr
+        }
+        if(auto)
+          sendLater(2sec, data) // autosync
+        return null
+
+      default:
+        throw Err("Unexpected action: $action !")
+    }
+  }
 
   ** Connects the client (if not already connected)
-  Void connect(Str password)
+  Void connect(Str password, AxonActorData data)
   {
    if(! Actor.locals.containsKey("camAxon.conn"))
     {
-      log("Connecting...")
       Actor.locals.remove("camAxon.data")
       c := AxonConn.load(projectFolder + AxonConn.fileName)
+      log("Connecting to $c ...", data)
       c.password = password
       c.connect
       Actor.locals["camAxon.conn"] = c
+      log("Connected !", data)
     }
    }
 
   ** Runs project synchronization with the server
-  Void sync(AxonConn conn)
+  AxonSyncInfo sync(AxonConn conn, AxonActorData data)
   {
+    File[] sentItems := [,]
+    File[] createdItems := [,]
+    File[] updatedItems := [,]
+
     Str:AxonSyncItem items := [:]
 
     if(Actor.locals.containsKey("camAxon.data"))
@@ -139,7 +150,11 @@ const class AxonSyncActor : Actor
       // new or updated file
       if( ! items.containsKey(r->name) || r->mod > items[r->name].remoteTs)
       {
-        log("Pulling from sever : $f")
+        if(f.exists)
+          updatedItems.add(f)
+        else
+          createdItems.add(f)
+        log("Pulling from sever : $f", data)
         f.out.print(r->src).close
         items[r->name] = AxonSyncItem {it.file = f.osPath; it.localTs = f.modified; it.remoteTs = r->mod}
       }
@@ -153,11 +168,19 @@ const class AxonSyncActor : Actor
         r := grid.find |row| {row->name == f.basename}
         if(r==null ||  f.modified > items[f.basename].localTs)
         {
-          log("Sending to server : $f")
+          sentItems.add(f)
+          log("Sending to server : $f", data)
 
           src  := f.readAllStr
-          expr := "commit(diff(read(func and name==$f.basename.toCode), {src: $src.toCode}))"
+          expr := r == null ?
+              "commit(diff(null, {name: $f.basename.toCode, src: $src.toCode, mod: $f.modified.ticks, func}, {add}))"
+            : "commit(diff(read(func and name==$f.basename.toCode), {src: $src.toCode}))"
           grid2 := conn.client.eval(expr).get(1min)
+          meta := grid2.meta
+          // Really should never happen unless inernal error
+          if(meta.has("errTrace"))
+            log("Error grid: " + meta["errTrace"], data)
+
           newMod := grid2.first->mod
 
           items[f.basename] = AxonSyncItem {it.file = f.osPath; it.localTs = f.modified; it.remoteTs = newMod}
@@ -165,6 +188,13 @@ const class AxonSyncActor : Actor
       }
     }
     Actor.locals["camAxon.data"] = items
+
+    return AxonSyncInfo
+    {
+      updatedFiles = updatedItems
+      createdFiles = createdItems
+      sentFiles  = sentItems
+    }
   }
 
   AxonEvalStack evalStack()
@@ -174,9 +204,16 @@ const class AxonSyncActor : Actor
     return Actor.locals["camAxon.evalStack"]
   }
 
-  ** Log to a file in the project for debugging / trcaing
-  Void log(Str msg)
+  ** Log to a file in the project for debugging / tracing
+  ** Obj would typically be an Err or string
+  Void log(Obj obj, AxonActorData data)
   {
+     data.runCallback(obj)
+
+     text := (obj is Err) ?
+           ((Err) obj).traceToStr
+           : obj.toStr
+
      File log := projectFolder + `_sync.log`
      // if file is old start over
      if(log.exists && DateTime.now - log.modified > 1hr)
@@ -185,7 +222,7 @@ const class AxonSyncActor : Actor
       log.create
      out := log.out(true)
      try
-       out.printLine("${DateTime.now.toLocale} - $msg")
+       out.printLine("${DateTime.now.toLocale} - $text")
      catch(Err e)
       e.trace
      finally
@@ -203,8 +240,9 @@ const class AxonActorData
   const AxonActorAction action
   const Str? password := null
   const Str? eval := null
-  ** If set, callback.val must contain a function of : |Obj?|
-  const Unsafe? callback := null
+  const Sys? sys := null
+
+  const |Obj?|? callback := null
 
   new make(|This| f)
   {
@@ -215,10 +253,9 @@ const class AxonActorData
   {
     if(callback != null)
     {
-      cb := (|Obj?|) callback.val
       Desktop.callAsync |->|
       {
-        cb.call(results)
+        callback(results)
       }
     }
   }

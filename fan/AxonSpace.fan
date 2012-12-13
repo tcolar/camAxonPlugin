@@ -32,6 +32,7 @@ const class AxonSpace : Space
   static const Image funcIcon := Image(`fan://icons/x16/func.png`)
   static const Image syncIcon := Image(`fan://icons/x16/sync.png`)
   static const Image helpIcon := Image(`fan://icons/x16/question.png`)
+  static const Image errorIcon := Image(`fan://icons/x16/err.png`)
 
   ** Project name
   const Str name
@@ -159,17 +160,7 @@ const class AxonSpace : Space
   {
     dir.listFiles.sort |a, b| {a.name  <=> b.name}.each |f|
     {
-      results.add(axonItem(f))
-    }
-  }
-
-  static Item axonItem(File file)
-  {
-    return Item
-    {
-      it.file = file
-      it.dis = file.name
-      it.icon = (file.ext == "axon" || file.isDir) ? funcIcon : Theme.fileToIcon(file)
+      results.add(AxonItem.fromFile(f))
     }
   }
 
@@ -181,13 +172,21 @@ const class AxonSpace : Space
     {
       data := AxonActorData {action=AxonActorAction.autoOn}
       result := syncActor.send(data).get
+      log("Auto sync -> on")
       sync // kick off sync
     }
     else
     {
       data := AxonActorData {action=AxonActorAction.autoOff}
+      log("Auto sync -> off")
       result := syncActor.send(data).get
     }
+  }
+
+  ** log to console
+  Void log(Str msg)
+  {
+    sys.frame.console.append([Item(msg)])
   }
 
   ** Sync the local project with the server
@@ -197,12 +196,27 @@ const class AxonSpace : Space
     if(pass == null)
       return // cancelled
 
-    data := AxonActorData {action=AxonActorAction.sync; password=pass; }
-    result := syncActor.send(data).get
-    showActorResults(result)
-    sys.frame.reload
+    log("Sync")
+    data := AxonActorData
+    {
+      action = AxonActorAction.sync
+      password = pass
+      callback = |Obj? obj|
+      {
+        if(obj is AxonSyncInfo)
+        {
+          info := obj as AxonSyncInfo
+          if( ! info.createdFiles.isEmpty)
+            sys.frame.reload // to refresh nav view
+        }
+        else
+          showActorResults(obj)
+      }
+    }
+    syncActor.send(data)
   }
 
+  ** chck current autosync status
   Bool autoStatus()
   {
     data := AxonActorData {action=AxonActorAction.autoStatus}
@@ -217,9 +231,14 @@ const class AxonSpace : Space
     if(pass == null)
       return // cancelled
 
-    data := AxonActorData {action=AxonActorAction.eval; password=pass; it.eval=toEval}
-    showActorResults(syncActor.send(data).get)
-    // todo: allow/implement up and down arrows in eval field
+    data := AxonActorData
+    {
+      callback = |Obj? obj| {showActorResults(obj)}
+      action = AxonActorAction.eval
+      password = pass
+      it.eval = toEval
+    }
+    syncActor.send(data)
   }
 
   ** Get the connection password. Ask user for it if we don't have it yet
@@ -235,7 +254,8 @@ const class AxonSpace : Space
     return pass
   }
 
-  ** Dispplay call results to user
+  ** Display call results to user
+  ** Can display error messages and sync thead infos as well
   Void showActorResults(Obj? result, Bool errorOnly := false)
   {
     if(result == null) return
@@ -248,16 +268,33 @@ const class AxonSpace : Space
     else if(result is Err)
     {
       e := result as Err
-      Dialog.openWarn(sys.frame, e.toStr, e)
+      items := [,]
+      e.traceToStr.splitLines.each |line|
+      {
+        items.add(Item{it.dis = line; it.icon = errorIcon})
+      }
+      sys.frame.console.append(items)
     }
     else if(result is Grid)
     {
       g := result as Grid
       meta := g.meta
       if(meta.has("errTrace"))
-        Dialog.openWarn(sys.frame, meta["dis"], meta["errTrace"])
+      {
+        items := [,]
+        (meta["errTrace"] as Str)?.splitLines?.each |line|
+        {
+          items.add(Item{it.dis = line; it.icon = errorIcon})
+        }
+        sys.frame.console.append(items)
+      }
       else
-        FolioGridDisplayer(g, sys.frame).open
+        sys.frame.console.append([AxonItem.fromGrid(g)])
+    }
+    else if(result is Str)
+    {
+      s := (Str) result
+      log(s)
     }
   }
 
