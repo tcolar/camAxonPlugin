@@ -45,6 +45,8 @@ const class AxonSpace : Space
 
   override Str dis() { name }
 
+  override File? root() {dir}
+
   override Image icon() { funcIcon }
 
   override File? curFile() { file }

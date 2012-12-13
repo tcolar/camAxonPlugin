@@ -1,9 +1,14 @@
+provide custom menus for axon file items with custom delete/rename etc ...
 - Deal with delete/rename -> replace standard item popups ?
   -> ask user whether only local or remote too
 
-save results of grid results
-run query async and show spinner, then whne done show green or red bulb, click to see results
+Provide sync preview / manual sunc window ?
+
+Grid results -> zync tab, Save as feature
 
 import project/history into local instance ?
+
+fix broken find/replace commands
+
 
 

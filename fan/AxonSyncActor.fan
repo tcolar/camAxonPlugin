@@ -80,7 +80,7 @@ const class AxonSyncActor : Actor
     switch(action)
     {
       case(AxonActorAction.eval):
-        log("Eval: $data.eval", data)
+        log("Eval: $data.eval ...", data)
         AxonEvalStack.read.append(data.eval)
         result := Unsafe(conn.client.eval(data.eval))
         return result
