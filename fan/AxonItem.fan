@@ -59,7 +59,6 @@ const class AxonItem : Item
     // Menu for Axon items
     return Menu
     {
-      // Same as "regular items"
       MenuItem
       {
         it.text = "Find in \"$file.name\""
@@ -71,10 +70,9 @@ const class AxonItem : Item
         dir := file.isDir ? file : file.parent
         it.text = "New file in \"$dir.name\""
         it.onAction.add |e|
-          { (frame.sys.commands.newFile as NewFileCmd).newFile(dir, frame) }
+          { (frame.sys.commands.newFile as NewFileCmd).newFile(dir, "mewFunc.axon", frame) }
       },
 
-      // Customized items for axon files
       MenuItem
       {
         it.text = "Delete \"$file.name\""

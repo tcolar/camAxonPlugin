@@ -102,16 +102,11 @@ const class AxonSpace : Space
           {
             left = GridPane
             {
-              numCols = 2
+              numCols = 1
               Button
               {
                 it.image = syncIcon
                 it.onAction.add |e| {sync}
-              },
-              Button
-              {
-                it.image = helpIcon
-                it.onAction.add |e| {syncHelp}
               },
             }
             right = /*GridPane
@@ -332,19 +327,6 @@ const class AxonSpace : Space
       data := AxonActorData {action=AxonActorAction.evalDown}
       eval.text = (Str) syncActor.send(data).get
     }
-  }
-
-  Void syncHelp()
-  {
-    Dialog.openInfo(sys.frame,
-    """The sync button will synchronize Axon functions to/from the server.
-       Currently neither local or remote files ever get deleted, you would
-       have to delete those on both sides manually (with auto sync off).
-       Note that this also applies to renaming functions.
-
-       The auto sync toggle buttons is used to enable / disable autosync.
-       With autosync on, sync is performed continously in the bacground every few seconds.
-       """)
   }
 }
 

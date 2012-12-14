@@ -9,6 +9,16 @@ const class AxonPlugin : Plugin
 {
   const Unsafe actors := Unsafe(AxonActors())
 
+  override Void onInit()
+  {
+    // create axon template if not there yet
+    axon := File(`${Options.standard.parent}/axon.tpl`)
+    if(! axon.exists)
+    {
+      axon.create.out.print("/*\nHistory: {date} {user} Creation\n*/\n\n() => do\n  //TODO\nend\n").close
+    }
+  }
+
   override Void onFrameReady(Frame frame)
   {
     // todo: change depending on licensing

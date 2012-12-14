@@ -36,6 +36,10 @@ const class AxonSyncActor : Actor
     catch(Err e)
     {
       log(e, data)
+      if(e is IOErr)
+      {
+        reconnect(data)
+      }
       return e
     }
     return null
@@ -125,7 +129,22 @@ const class AxonSyncActor : Actor
       Actor.locals["camAxon.conn"] = c
       log("Connected !", data)
     }
-   }
+  }
+
+  ** Reconnect ... useful in case we got an IoErr, such as if we got logged out
+  Void reconnect(AxonActorData? data)
+  {
+    if(data != null)
+    {
+      log("Trying to reconnect ...", data)
+      conn := (AxonConn?) Actor.locals["camAxon.conn"]
+      if(conn != null)
+      {
+        conn?.connect
+        log("Reconnected !", data)
+      }
+    }
+  }
 
   ** Runs project synchronization with the server
   AxonSyncInfo sync(AxonConn conn, AxonActorData data)

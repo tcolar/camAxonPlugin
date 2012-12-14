@@ -1,10 +1,26 @@
 Grid results -> zync tab, Save as feature
 
+on axon file -> right click -> copy name (to cliboard)
+
+sparks editor ? (readAll(rule))
+
+button rollovers/ doc
+
+provide way to renew the conncetion if dead (and mabe also reconnect automatically if sys::IOErr: Server error status = 303 happens)
+
 Temp license :
 - ony work for one day ?
 - only connect to dem project ?
 - shutdown after a while ?
 - allow only a few sync ?
 - purchase -> good for 1 year with free upgardes
+
+New file -> custom template for axon files
+
+have a template file per extension ->
+"fan" -> "....."
+"axon" -> "....."
+"empty" -> ""
+etc...
 
 
