@@ -83,6 +83,11 @@ const class AxonSyncActor : Actor
 
     switch(action)
     {
+      case(AxonActorAction.deleteFunc):
+         log("Deleting from server function : $data.deleteFunc ", data)
+         del := "commit(diff(read(func and name==$data.deleteFunc.toCode), null, {remove}))"
+         return Unsafe(conn.client.eval(del).get)
+
       case(AxonActorAction.eval):
         log("Eval: $data.eval ...", data)
         AxonEvalStack.read.append(data.eval)
@@ -187,7 +192,7 @@ const class AxonSyncActor : Actor
           expr := r == null ?
               "commit(diff(null, {name: $f.basename.toCode, src: $src.toCode, mod: $f.modified.ticks, func}, {add}))"
             : "commit(diff(read(func and name==$f.basename.toCode), {src: $src.toCode}))"
-          grid2 := conn.client.eval(expr).get(1min)
+          grid2 := conn.client.eval(expr).get
           meta := grid2.meta
           // Really should never happen unless inernal error
           if(meta.has("errTrace"))
@@ -263,6 +268,7 @@ const class AxonActorData
   const Str? password := null
   const Str? eval := null
   const Sys? sys := null
+  const Str? deleteFunc := null
 
   const |Obj?|? callback := null
 
@@ -287,7 +293,7 @@ const class AxonActorData
 enum class AxonActorAction
 {
   needsPassword, sync, eval, evalUp, evalDown, evalLast,
-  autoOn, autoOff, autoStatus
+  autoOn, autoOff, autoStatus, deleteFunc
 }
 
 **************************************************************************

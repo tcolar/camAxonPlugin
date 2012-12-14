@@ -13,8 +13,6 @@ class AxonMenu : Menu
   {
     text = "Axon"
     add(MenuItem{ it.command = NewAxonPrj{sysRef.val = frame.sys}.asCommand })
-    //MenuItem{ it.command = sys.commands.openProject.asCommand},
-    //MenuItem{ it.command = sys.commands.newFunction.asCommand},
   }
 }
 

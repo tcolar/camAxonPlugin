@@ -11,6 +11,7 @@ const class AxonPlugin : Plugin
 
   override Void onFrameReady(Frame frame)
   {
+    // todo: change depending on licensing
     (frame.menuBar as MenuBar).plugins.add(AxonMenu(frame))
   }
 
@@ -43,6 +44,7 @@ const class AxonPlugin : Plugin
   ** Called via Dynamic call
   Str:TrioInfo trioData(File[] podDirs)
   {
+    // if licene != valid return nothing
     AxonIndexer().trioData(podDirs)
   }
 }

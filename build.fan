@@ -17,9 +17,9 @@ class Build : BuildPod
                "camembert 1.0.9+",
                "netColarUtils 1.0.0+",
                "netColarUI 1.0.0+"]
-    srcDirs = [`fan/`]
+    srcDirs = [`fan/`, `fan/licensing/`]
     resDirs = [,]
-    meta    = ["license.name" : "Commercial / TBD",
+    meta    = ["license.name" : "Commercial",
                 "org.name"   : "Status 302 LLC",
                 "camembert.plugin" : "AxonPlugin"]
     docSrc  = true

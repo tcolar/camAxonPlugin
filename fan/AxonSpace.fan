@@ -17,6 +17,8 @@ const class AxonSpace : Space
 
   new make(Sys sys, File dir, File? file) : super(sys)
   {
+    // todo: check license, throw err if needed
+
     if (!dir.exists) throw Err("Dir doesn't exist: $dir")
     if (!dir.isDir) throw Err("Not a dir: $dir")
 
@@ -243,6 +245,23 @@ const class AxonSpace : Space
     syncActor.send(data)
   }
 
+  Void remoteDelete(Str funcName)
+  {
+    pass := getPass
+    if(pass == null)
+      return // cancelled
+
+    data := AxonActorData
+    {
+      callback = |Obj? obj| {showActorResults(obj, true)}
+      action = AxonActorAction.deleteFunc
+      deleteFunc = funcName
+      password = pass
+    }
+    syncActor.send(data)
+
+  }
+
   ** Get the connection password. Ask user for it if we don't have it yet
   ** Returns null if cancel was pressed on dialog
   Str? getPass()
@@ -291,7 +310,7 @@ const class AxonSpace : Space
         sys.frame.console.append(items)
       }
       else
-        sys.frame.console.append([AxonItem.fromGrid(g)])
+        sys.frame.console.append([AxonItem.fromGrid(g, this)])
     }
     else if(result is Str)
     {
