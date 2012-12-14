@@ -12,10 +12,14 @@ using camembert
 const class AxonSyncActor : Actor
 {
   const File projectFolder
+  const File dataFile
+  const File logFile
 
   new make(File folder) : super(ActorPool())
   {
     this.projectFolder = folder
+    dataFile = projectFolder + `_sync_items.obj`
+    logFile = projectFolder + `_sync.log`
   }
 
   ** Sync from/to server
@@ -129,6 +133,14 @@ const class AxonSyncActor : Actor
 
     if(Actor.locals.containsKey("camAxon.data"))
       items = (Str:AxonSyncItem) Actor.locals["camAxon.data"]
+    else
+    {
+      // first sync since app was started, try to reuse last run data
+      if(dataFile.exists)
+      try
+        items = dataFile.readObj()
+      catch(Err e) {e.trace}
+    }
 
     grid := conn.client.eval(Str<|readAll(func).keepCols(["id", "mod", "name", "src"])|>).get(1min)
 
@@ -138,7 +150,7 @@ const class AxonSyncActor : Actor
       {
         if( ! items.containsKey(f.basename))
         {
-          items[f.basename] = AxonSyncItem {it.file = f.osPath; it.localTs = f.modified; it.remoteTs = f.modified}
+          items[f.basename] = AxonSyncItem {it.path = relPath(f); it.localTs = f.modified; it.remoteTs = f.modified}
         }
       }
     }
@@ -156,7 +168,7 @@ const class AxonSyncActor : Actor
           createdItems.add(f)
         log("Pulling from sever : $f", data)
         f.out.print(r->src).close
-        items[r->name] = AxonSyncItem {it.file = f.osPath; it.localTs = f.modified; it.remoteTs = r->mod}
+        items[r->name] = AxonSyncItem {it.path =  relPath(f); it.localTs = f.modified; it.remoteTs = r->mod}
       }
     }
 
@@ -183,11 +195,15 @@ const class AxonSyncActor : Actor
 
           newMod := grid2.first->mod
 
-          items[f.basename] = AxonSyncItem {it.file = f.osPath; it.localTs = f.modified; it.remoteTs = newMod}
+          items[f.basename] = AxonSyncItem {it.path =  relPath(f); it.localTs = f.modified; it.remoteTs = newMod}
         }
       }
     }
     Actor.locals["camAxon.data"] = items
+
+    // if any changes write the sync data file so it can get picked up if app is restarted
+    if( ! updatedItems.isEmpty || ! createdItems.isEmpty || ! sentItems.isEmpty)
+      dataFile.writeObj(items)
 
     return AxonSyncInfo
     {
@@ -214,19 +230,25 @@ const class AxonSyncActor : Actor
            ((Err) obj).traceToStr
            : obj.toStr
 
-     File log := projectFolder + `_sync.log`
      // if file is old start over
-     if(log.exists && DateTime.now - log.modified > 1hr)
-      log.delete
-     if(! log.exists)
-      log.create
-     out := log.out(true)
+     if(logFile.exists && DateTime.now - logFile.modified > 1hr)
+      logFile.delete
+     if(! logFile.exists)
+      logFile.create
+     out := logFile.out(true)
      try
        out.printLine("${DateTime.now.toLocale} - $text")
      catch(Err e)
       e.trace
      finally
       out.close
+  }
+
+  ** File path relative to project
+  ** using this so that if project is relocated AxonSycItem serialization stays valid
+  Str relPath(File f)
+  {
+    return f.normalize.uri.relTo(projectFolder.normalize.uri).toStr
   }
 }
 
@@ -273,14 +295,14 @@ enum class AxonActorAction
 **************************************************************************
 
 ** Data about a synced file
+** Note: serilized to obj, be careful if changing
 @Serializable
 internal const class AxonSyncItem
 {
-  const Str file
+  ** Path relative to project folder
+  const Str path
   const DateTime? localTs
   const DateTime? remoteTs
-
-  DateTime fileModif() {return File.os(file).modified}
 
   new make(|This| f) {f(this)}
 
@@ -289,7 +311,7 @@ internal const class AxonSyncItem
   {
     return AxonSyncItem
     {
-      it.file = this.file
+      it.path = this.path
       it.localTs = ts
       it.remoteTs = ts
     }
@@ -300,7 +322,7 @@ internal const class AxonSyncItem
   {
     return AxonSyncItem
     {
-      it.file = this.file
+      it.path = this.path
       it.localTs = ts
       it.remoteTs = this.remoteTs
     }

@@ -6,9 +6,11 @@ Provide sync preview / manual sunc window ?
 
 Grid results -> zync tab, Save as feature
 
-import project/history into local instance ?
-
-fix broken find/replace commands
-
+Temp license :
+- ony work for one day ?
+- only connect to dem project ?
+- shutdown after a while ?
+- allow only a few sync ?
+- purchase -> good for 1 year with free upgardes
 
 
