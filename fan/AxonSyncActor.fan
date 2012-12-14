@@ -155,7 +155,7 @@ const class AxonSyncActor : Actor
       {
         if( ! items.containsKey(f.basename))
         {
-          items[f.basename] = AxonSyncItem {it.path = relPath(f); it.localTs = f.modified; it.remoteTs = f.modified}
+          items[f.basename] = AxonSyncItem {it.path = relPath(f); it.localTs = f.modified.ticks; it.remoteTs = f.modified.ticks}
         }
       }
     }
@@ -165,7 +165,7 @@ const class AxonSyncActor : Actor
     {
       f := conn.dir + `${r->name}.axon`
       // new or updated file
-      if( ! items.containsKey(r->name) || r->mod > items[r->name].remoteTs)
+      if( ! items.containsKey(r->name) || r->mod->ticks > items[r->name].remoteTs)
       {
         if(f.exists)
           updatedItems.add(f)
@@ -173,7 +173,7 @@ const class AxonSyncActor : Actor
           createdItems.add(f)
         log("Pulling from sever : $f", data)
         f.out.print(r->src).close
-        items[r->name] = AxonSyncItem {it.path =  relPath(f); it.localTs = f.modified; it.remoteTs = r->mod}
+        items[r->name] = AxonSyncItem {it.path =  relPath(f); it.localTs = f.modified.ticks; it.remoteTs = r->mod->ticks}
       }
     }
 
@@ -183,7 +183,7 @@ const class AxonSyncActor : Actor
       if(f.ext == "axon")
       {
         r := grid.find |row| {row->name == f.basename}
-        if(r==null ||  f.modified > items[f.basename].localTs)
+        if(r==null ||  f.modified.ticks > items[f.basename].localTs)
         {
           sentItems.add(f)
           log("Sending to server : $f", data)
@@ -198,9 +198,9 @@ const class AxonSyncActor : Actor
           if(meta.has("errTrace"))
             log("Error grid: " + meta["errTrace"], data)
 
-          newMod := grid2.first->mod
+          newMod := grid2.first->mod->ticks
 
-          items[f.basename] = AxonSyncItem {it.path =  relPath(f); it.localTs = f.modified; it.remoteTs = newMod}
+          items[f.basename] = AxonSyncItem {it.path =  relPath(f); it.localTs = f.modified.ticks; it.remoteTs = newMod}
         }
       }
     }
@@ -307,13 +307,13 @@ internal const class AxonSyncItem
 {
   ** Path relative to project folder
   const Str path
-  const DateTime? localTs
-  const DateTime? remoteTs
+  const Int? localTs
+  const Int? remoteTs
 
   new make(|This| f) {f(this)}
 
   // Return a new instance for the same file but with an updated ts (both local & remote)
-  AxonSyncItem withTs(DateTime ts)
+  AxonSyncItem withTs(Int ts)
   {
     return AxonSyncItem
     {
@@ -324,7 +324,7 @@ internal const class AxonSyncItem
   }
 
   // New instance with new remoteTs
-  AxonSyncItem withLocalTs(DateTime ts)
+  AxonSyncItem withLocalTs(Int ts)
   {
     return AxonSyncItem
     {

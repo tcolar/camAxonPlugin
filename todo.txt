@@ -1,9 +1,3 @@
-provide custom menus for axon file items with custom delete/rename etc ...
-- Deal with delete/rename -> replace standard item popups ?
-  -> ask user whether only local or remote too
-
-Provide sync preview / manual sunc window ?
-
 Grid results -> zync tab, Save as feature
 
 Temp license :
