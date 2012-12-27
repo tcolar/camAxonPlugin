@@ -1,29 +1,42 @@
 // History:
-//   12 13 12 Creation
+//   12 13 12 tcolar Creation
+
 using camembert
+using netColarUtils
 
 @NoDoc
-internal const class License
+internal class License
 {
-  private const LicenseType type
-  private const File file
+  private static const Str productName := "camAxonPlugin"
+
+  private LicenseData? data
+  private File file
+  private LicenseStatus status
 
   new make(File file)
   {
     this.file = file
     if(! file.exists)
-    {
-      type = LicenseType.none
       return
-    }
 
-    // todo
-    type = LicenseType.invalid
+    status =  LicenseStatus.none
+
+    try
+    {
+      data = LicenseData.load(file.in)
+      hash := Buf().print(MacAddressFinder().find).toDigest("MD5").toHex
+      status = data.status(productName, hash)
+    }
+    catch(Err e)
+    {
+      status = LicenseStatus.invalid
+      e.trace
+    }
   }
 
   internal Bool valid()
   {
-    return type == LicenseType.trial || type == LicenseType.full
+    return status == LicenseStatus.valid
   }
 
   ** apply the license
@@ -32,8 +45,4 @@ internal const class License
   }
 }
 
-@NoDoc
-internal enum class LicenseType
-{
-  none, invalid, trial, full
-}
+

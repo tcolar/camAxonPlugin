@@ -61,6 +61,12 @@ const class AxonItem : Item
     {
       MenuItem
       {
+        it.text = "Copy name to clipboard"
+        it.onAction.add |e|
+          { Desktop.clipboard.setText(file.basename) }
+      },
+      MenuItem
+      {
         it.text = "Find in \"$file.name\""
         it.onAction.add |e|
           { (frame.sys.commands.find as FindCmd).find(file) }
