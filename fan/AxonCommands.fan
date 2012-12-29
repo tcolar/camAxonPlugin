@@ -3,12 +3,11 @@
 
 using fwt
 using camembert
-using skyspark
 using netColarUtils
 
 const class NewAxonPrj : Cmd
 {
-  override const Str name := "New Axon project"
+  override const Str name := "Import Axon project"
   override Void invoke(Event event)
   {
     Text project := Text()
@@ -54,6 +53,29 @@ const class NewAxonPrj : Cmd
     item := AxonItem.fromFile(f)
 
     frame.goto(item, true)
+  }
+
+  new make(|This| f) {f(this)}
+}
+
+const class LicensingCmd : Cmd
+{
+  override const Str name := "Licensing"
+  override Void invoke(Event event)
+  {
+    LicenseWindow(frame).update(License.licFile).open
+  }
+
+  new make(|This| f) {f(this)}
+}
+
+const class AboutCmd : Cmd
+{
+  override const Str name := "About"
+  override Void invoke(Event event)
+  {
+    version := Pod.of(this).version.toStr
+    Dialog.openInfo(frame, "Camembert Axon plugin.\n\nVersion:$version\n\nBy Thibaut Colar.\n\nhttp://www.status302.com/",null)
   }
 
   new make(|This| f) {f(this)}

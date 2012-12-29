@@ -11,17 +11,18 @@ class Build : BuildPod
                "concurrent 1.0",
                "gfx 1.0",
                "fwt 1.0",
-               "skyspark 1.0+",
-               "folio 1.0+",
                "util 1.0+",
-               "fresco 1.0+",
                "web 1.0+",
                "camembert 1.0.9+",
                "netColarUtils 1.0.0+",
-               "netColarUI 1.0.0+"]
+               "netColarUI 1.0.0+",
+               // haystack 2.0+ required
+               "haystack 2.0+"
+               ]
+    version = Version("1.0.0")
     srcDirs = [`fan/`, `fan/licensing/`]
     resDirs = [,]
-    meta    = ["license.name" : "Commercial",
+    meta    = ["license.name" : "Free Trial / Commercial",
                 "org.name"   : "Status 302 LLC",
                 "camembert.plugin" : "AxonPlugin"]
     docSrc  = true

@@ -2,16 +2,15 @@
 //   12 6 12 - Thibaut Colar Creation
 
 using fwt
-using folio
-using fresco
+using haystack
 using gfx
 using netColarUI
 
 **
-** FolioGridDisplayer
+** HaytackGridDisplayer
 ** Display Grid results tabulated in a window
 **
-class FolioGridDisplayer
+class HaystackGridDisplayer
 {
   private Window win
 
@@ -25,7 +24,7 @@ class FolioGridDisplayer
         content = ScrollPane{
           content = Table
           {
-            model = GridTableModel(g)
+            model = HaystackGridModel(g)
             onAction.add |Event e| {showRow(e, g)}
           }
         }
@@ -64,3 +63,24 @@ class FolioGridDisplayer
   }
 }
 
+class HaystackGridModel : TableModel
+{
+  Grid grid
+
+  new make(Grid g)
+  {
+    this.grid = g
+  }
+
+  override Int numCols() {grid.cols.size}
+
+  override Int numRows() {grid.size}
+
+  override Str header(Int col) {grid.colDisNames[col]}
+
+  override Str text(Int col, Int row)
+  {
+    val := grid[row][grid.colNames[col]]
+    return val == null ? "null" : val.toStr
+  }
+}

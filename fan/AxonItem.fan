@@ -2,7 +2,7 @@
 //   12 12 12 Thibaut Colar Creation
 
 using camembert
-using folio
+using haystack
 using gfx
 using fwt
 
@@ -45,7 +45,7 @@ const class AxonItem : Item
   override Void selected(Frame frame)
   {
     if(grid != null)
-      FolioGridDisplayer(grid.val, frame).open
+      HaystackGridDisplayer(grid.val, frame).open
     else
       super.selected(frame)
   }

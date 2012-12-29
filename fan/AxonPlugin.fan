@@ -9,6 +9,13 @@ const class AxonPlugin : Plugin
 {
   const Unsafe actors := Unsafe(AxonActors())
 
+  const Unsafe license
+
+  new make()
+  {
+    license = Unsafe(License(License.licFile))
+  }
+
   override Void onInit()
   {
     // create axon template if not there yet
@@ -21,12 +28,14 @@ const class AxonPlugin : Plugin
 
   override Void onFrameReady(Frame frame)
   {
-    // todo: change depending on licensing
     (frame.menuBar as MenuBar).plugins.add(AxonMenu(frame))
   }
 
   override Space? createSpace(Sys sys, File file)
   {
+    if( ! licOk)
+      return null
+
     File dir := file.isDir ? file : file.parent
     if(file.ext == "axon" ||
         file.name == AxonConn.fileName.toStr ||
@@ -40,6 +49,9 @@ const class AxonPlugin : Plugin
 
   override Item? projectItem(File dir, Int indent)
   {
+    if( ! licOk)
+      return null
+
     if(dir.isDir && dir.plus(AxonConn.fileName).exists)
       return AxonItem.fromFile(dir)
     return null
@@ -54,7 +66,16 @@ const class AxonPlugin : Plugin
   ** Called via Dynamic call
   Str:TrioInfo trioData(File[] podDirs)
   {
-    // if licene != valid return nothing
-    AxonIndexer().trioData(podDirs)
+    if( ! licOk)
+      return [:]
+
+    return AxonIndexer().trioData(podDirs)
+  }
+
+  private Bool licOk()
+  {
+    lic := license.val as License
+    if(lic == null) return false
+    return lic.valid
   }
 }

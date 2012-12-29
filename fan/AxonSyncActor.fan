@@ -17,6 +17,9 @@ const class AxonSyncActor : Actor
 
   new make(File folder) : super(ActorPool())
   {
+    if( ! License(License.licFile).valid)
+      throw Err("Invalid license")
+
     this.projectFolder = folder
     dataFile = projectFolder + `_sync_items.obj`
     logFile = projectFolder + `_sync.log`
@@ -90,7 +93,7 @@ const class AxonSyncActor : Actor
       case(AxonActorAction.deleteFunc):
          log("Deleting from server function : $data.deleteFunc ", data)
          del := "commit(diff(read(func and name==$data.deleteFunc.toCode), null, {remove}))"
-         return Unsafe(conn.client.eval(del).get)
+         return Unsafe(conn.client.eval(del))
 
       case(AxonActorAction.eval):
         log("Eval: $data.eval ...", data)
@@ -166,7 +169,7 @@ const class AxonSyncActor : Actor
       catch(Err e) {e.trace}
     }
 
-    grid := conn.client.eval(Str<|readAll(func).keepCols(["id", "mod", "name", "src"])|>).get(1min)
+    grid := conn.client.eval(Str<|readAll(func).keepCols(["id", "mod", "name", "src"])|>)
 
     conn.dir.list.each |f|
     {
@@ -211,7 +214,7 @@ const class AxonSyncActor : Actor
           expr := r == null ?
               "commit(diff(null, {name: $f.basename.toCode, src: $src.toCode, mod: $f.modified.ticks, func}, {add}))"
             : "commit(diff(read(func and name==$f.basename.toCode), {src: $src.toCode}))"
-          grid2 := conn.client.eval(expr).get
+          grid2 := conn.client.eval(expr)
           meta := grid2.meta
           // Really should never happen unless inernal error
           if(meta.has("errTrace"))

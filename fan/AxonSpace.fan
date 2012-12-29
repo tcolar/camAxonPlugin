@@ -5,7 +5,7 @@ using camembert
 using fwt
 using gfx
 using concurrent
-using folio
+using haystack
 
 **
 ** AxonSpace
@@ -17,7 +17,8 @@ const class AxonSpace : Space
 
   new make(Sys sys, File dir, File? file) : super(sys)
   {
-    // todo: check license, throw err if needed
+    if( ! License(License.licFile).valid)
+      throw Err("Invalid license")
 
     if (!dir.exists) throw Err("Dir doesn't exist: $dir")
     if (!dir.isDir) throw Err("Not a dir: $dir")
@@ -279,8 +280,6 @@ const class AxonSpace : Space
 
     if(result is Unsafe)
       showActorResults((result as Unsafe).val)
-    else if(result is Result)
-      showActorResults((result as Result).get)
     else if(result is Err)
     {
       e := result as Err

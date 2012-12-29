@@ -1,8 +1,7 @@
 // History:
 //   12 4 12 - Thibaut Colar Creation
 
-using skyspark
-using folio
+using haystack
 using camembert
 using netColarUtils
 using fwt
@@ -30,7 +29,7 @@ class AxonConn
 
   new make(|This| f) {f(this)}
 
-  ** Connects to skysaprk
+  ** Connects to skyspark
   ** Will throw an Err if fails
   Void connect()
   {

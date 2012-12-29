@@ -7,19 +7,21 @@ using netColarUtils
 @NoDoc
 internal class License
 {
-  private static const Str productName := "camAxonPlugin"
+  internal static const Str productName := "camAxonPlugin"
 
-  private LicenseData? data
-  private File file
-  private LicenseStatus status
+  static const File licFile := Env.cur.workDir + `etc/camAxonPlugin/license.json`
+
+  internal LicenseData? data
+  internal File? file
+  internal LicenseStatus status
 
   new make(File file)
   {
     this.file = file
+    status =  LicenseStatus.none
+
     if(! file.exists)
       return
-
-    status =  LicenseStatus.none
 
     try
     {
@@ -39,8 +41,7 @@ internal class License
     return status == LicenseStatus.valid
   }
 
-  ** apply the license
-  internal Void apply(Frame frame)
+  internal Void apply(Frame f)
   {
   }
 }

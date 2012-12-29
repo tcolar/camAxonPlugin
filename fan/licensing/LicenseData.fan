@@ -1,7 +1,7 @@
 // History:
 //  Dec 20 12 tcolar Creation
 //
-// This class(es) re meant to be copied into the client side
+// This class(es) are meant to be copied/used on the client side
 //
 
 using netColarUtils
@@ -15,7 +15,7 @@ internal class LicenseData
   Int issueTime
   Int validUntil
   Str type
-  [Str:Str] info // user, email, host
+  [Str:Str] info // user, email, host, whatever
   Str? hashKey
 
   new make(|This| f)
@@ -34,15 +34,20 @@ internal class LicenseData
       if(field.name != "hashKey")
       {
         if(field.name == "info")
-          (field.get(data) as Str:Str).each {concat += it}
+        {
+          dt := field.get(data)  as Str:Str
+          dt.keys.sort|a,b| {a<=>b}.each {concat += dt[it]}
+        }
         else
           concat+= field.get(data).toStr
       }
     }
-    return Buf.make.print(hostKey).print("#@302L1ce"+"ns1ng!!").toDigest("MD5").toHex
+    digest := Buf().print(concat).print(hostKey).print("#@302L1ce"+"ns1ng!!").flip.toDigest("MD5").toHex
+    return digest
   }
 
   ** Check the license is valid on the local machine
+  @NoDoc
   internal LicenseStatus status(Str prd, Str hostMd5)
   {
     if(product != prd)
@@ -54,6 +59,7 @@ internal class LicenseData
     return LicenseStatus.valid
   }
 
+  @NoDoc
   static LicenseData load(InStream in)
   {
     return (LicenseData) JsonUtils.load(in, LicenseData#)
@@ -61,6 +67,7 @@ internal class LicenseData
 
   ** Fetch the license from the server
   ** Might throw an Err
+  @NoDoc
   static Void fetch(File dest, Str product, Str hostMd5, Str:Str extra := [:])
   {
     Str:Str data := extra.dup
@@ -69,12 +76,14 @@ internal class LicenseData
     data["user"] = Env.cur.user
     data["hostKey"] = hostMd5
     dataStr := Buf().writeObj(data).flip.readAllStr
-    echo("dataStr: $dataStr")
-    c := WebClient(`http://localhost:8080/fetch`)
+    c := WebClient(`http://lic.status302.com/fetch`)
     c.postStr(dataStr)
-    c.readRes
 
-   // TODO: save to file
+    if(c.resCode != 200)
+      throw Err("Faied: $c.resStr")
+
+    // write the (json) license to file
+    dest.out.printLine(c.resStr).close
   }
 }
 
@@ -83,4 +92,5 @@ internal enum class LicenseStatus
 {
   none, invalid, valid, expired
 }
+
 
