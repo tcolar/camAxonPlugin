@@ -93,12 +93,12 @@ const class AxonSyncActor : Actor
       case(AxonActorAction.deleteFunc):
          log("Deleting from server function : $data.deleteFunc ", data)
          del := "commit(diff(read(func and name==$data.deleteFunc.toCode), null, {remove}))"
-         return Unsafe(conn.client.eval(del))
+         return Unsafe(conn.client.evalAll([del])[0])
 
       case(AxonActorAction.eval):
         log("Eval: $data.eval ...", data)
         AxonEvalStack.read.append(data.eval)
-        result := Unsafe(conn.client.eval(data.eval))
+        result := Unsafe(conn.client.evalAll([data.eval.trim])[0])
         return result
 
       case(AxonActorAction.sync):
@@ -169,7 +169,7 @@ const class AxonSyncActor : Actor
       catch(Err e) {e.trace}
     }
 
-    grid := conn.client.eval(Str<|readAll(func).keepCols(["id", "mod", "name", "src"])|>)
+    grid := conn.client.evalAll([Str<|readAll(func).keepCols(["id", "mod", "name", "src"])|>])[0]
 
     conn.dir.list.each |f|
     {
@@ -214,7 +214,7 @@ const class AxonSyncActor : Actor
           expr := r == null ?
               "commit(diff(null, {name: $f.basename.toCode, src: $src.toCode, mod: $f.modified.ticks, func}, {add}))"
             : "commit(diff(read(func and name==$f.basename.toCode), {src: $src.toCode}))"
-          grid2 := conn.client.eval(expr)
+          grid2 := conn.client.evalAll([expr])[0]
           meta := grid2.meta
           // Really should never happen unless inernal error
           if(meta.has("errTrace"))

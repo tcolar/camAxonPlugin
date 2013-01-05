@@ -31,7 +31,7 @@ const class AxonPlugin : Plugin
     (frame.menuBar as MenuBar).plugins.add(AxonMenu(frame))
   }
 
-  override Space? createSpace(Sys sys, File file)
+  override Space? createSpace(File file)
   {
     if( ! licOk)
       return null
@@ -41,7 +41,7 @@ const class AxonPlugin : Plugin
         file.name == AxonConn.fileName.toStr ||
         dir.plus(AxonConn.fileName).exists
       )
-        return AxonSpace(sys, dir, file)
+        return AxonSpace(Sys.cur.frame, dir, file)
     return null
   }
 
@@ -53,7 +53,11 @@ const class AxonPlugin : Plugin
       return null
 
     if(dir.isDir && dir.plus(AxonConn.fileName).exists)
-      return AxonItem.fromFile(dir)
+    {
+      item := AxonItem.fromFile(dir)
+      item.isProject = true
+      return item
+    }
     return null
   }
 

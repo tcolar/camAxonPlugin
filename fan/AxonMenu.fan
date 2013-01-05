@@ -23,13 +23,13 @@ class AxonMenu : Menu
     license := License(License.licFile)
     if(license.valid)
     {
-      add(MenuItem{ it.command = NewAxonPrj{sysRef.val = frame.sys}.asCommand })
+      add(MenuItem{ it.command = NewAxonPrj{}.asCommand })
     }
     else
     {
     }
-    add(MenuItem{ it.command = LicensingCmd{sysRef.val = frame.sys}.asCommand })
-    add(MenuItem{ it.command = AboutCmd{sysRef.val = frame.sys}.asCommand })
+    add(MenuItem{ it.command = LicensingCmd{}.asCommand })
+    add(MenuItem{ it.command = AboutCmd{}.asCommand })
   }
 }
 

@@ -9,7 +9,7 @@ internal class License
 {
   internal static const Str productName := "camAxonPlugin"
 
-  static const File licFile := Env.cur.workDir + `etc/camAxonPlugin/license.json`
+  static const File licFile := Env.cur.workDir + `etc/camembert/axonPlugin_license.json`
 
   internal LicenseData? data
   internal File? file

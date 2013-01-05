@@ -2,7 +2,7 @@
 //   12 6 12 - Thibaut Colar Creation
 
 using fwt
-using haystack
+//using haystack
 using gfx
 using netColarUI
 

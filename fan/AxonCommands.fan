@@ -14,7 +14,7 @@ const class NewAxonPrj : Cmd
     Text host := Text()
     Text user := Text()
 
-    dirs := frame.sys.options.srcDirs
+    dirs := Sys.cur.options.srcDirs
     dir := dirs.isEmpty ? Env.cur.homeDir.pathStr : File(dirs[0]).pathStr
 
     Text folder := Text {it.text = dir}
@@ -52,7 +52,7 @@ const class NewAxonPrj : Cmd
 
     item := AxonItem.fromFile(f)
 
-    frame.goto(item, true)
+    frame.goto(item)
   }
 
   new make(|This| f) {f(this)}

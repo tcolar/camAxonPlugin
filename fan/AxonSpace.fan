@@ -5,68 +5,62 @@ using camembert
 using fwt
 using gfx
 using concurrent
-using haystack
+//using haystack
 
 **
 ** AxonSpace
 **
 @Serializable
-const class AxonSpace : Space
+class AxonSpace : BaseSpace
 {
   const AxonSyncActor syncActor
 
-  new make(Sys sys, File dir, File? file) : super(sys)
-  {
-    if( ! License(License.licFile).valid)
-      throw Err("Invalid license")
-
-    if (!dir.exists) throw Err("Dir doesn't exist: $dir")
-    if (!dir.isDir) throw Err("Not a dir: $dir")
-
-    this.name = dir.name
-
-    this.dir  = dir.normalize
-    this.file = file ?: dir + AxonConn.fileName
-
-    AxonActors acts := sys.plugins[Pod.of(this).name]->actors->val
-    syncActor = acts.forProject(dir)
-  }
+  override View? view
+  override Nav? nav
+  override Image icon() { funcIcon }
 
   static const Image funcIcon := Image(`fan://icons/x16/func.png`)
   static const Image syncIcon := Image(`fan://icons/x16/sync.png`)
   static const Image helpIcon := Image(`fan://icons/x16/question.png`)
   static const Image errorIcon := Image(`fan://icons/x16/err.png`)
 
-  ** Project name
-  const Str name
+  new make(Frame frame, File dir, File? file) :
+      super(frame, dir.name, dir.normalize, file?: dir + AxonConn.fileName)
+  {
+    if( ! License(License.licFile).valid)
+      throw Err("Invalid license")
 
-  ** Project directory
-  const File dir
+    AxonActors acts := Sys.cur.plugins[Pod.of(this).name]->actors->val
+    syncActor = acts.forProject(dir)
 
-  ** Proect / conn file
-  const File file
+    view = View.makeBest(frame, this.file)
+    nav = AxonNav(frame, dir, AxonItemBuilder(), Item(this.file))
 
-  override Str dis() { name }
+    navParent.content = navPane(nav)
 
-  override File? root() {dir}
-
-  override Image icon() { funcIcon }
-
-  override File? curFile() { file }
-
-  override PodInfo? curPod() { null }
-
-  override TypeInfo? curType() {null}
+    evalText := Text
+    {
+      data := AxonActorData {action=AxonActorAction.evalLast}
+      it.text = (Str) syncActor.send(data).get
+    }
+    evalText.onKeyUp.add |Event e| {evalKeyUp(e, evalText)}
+    evalText.onAction.add |e| {eval(evalText.text)}
+    viewParent.content = EdgePane
+    {
+      center = View.makeBest(frame, file)
+      bottom = EdgePane{left = Label{it.text="Eval:"}; center = evalText}
+    }
+  }
 
   override Str:Str saveSession()
   {
     ["dir":dir.uri.toStr, "file":file.uri.toStr]
   }
 
-  static Space loadSession(Sys sys, Str:Str props)
+  static Space loadSession(Frame frame, Str:Str props)
   {
   // sys.plugin......
-    make(sys, props.getOrThrow("dir").toUri.toFile,
+    make(frame, props.getOrThrow("dir").toUri.toFile,
       props.get("file")?.toUri?.toFile)
   }
 
@@ -78,90 +72,45 @@ const class AxonSpace : Space
     return 1000
   }
 
-  override This goto(Item item)
+  Pane navPane(Nav nav)
   {
-    make(sys, dir, item.file)
-  }
-
-  override Widget onLoad(Frame frame)
-  {
-    frame.history.push(this, Item(file))
-    evalText := Text
-    {
-      data := AxonActorData {action=AxonActorAction.evalLast}
-      it.text = (Str) syncActor.send(data).get
-    }
-    evalText.onKeyUp.add |Event e| {evalKeyUp(e, evalText)}
-    evalText.onAction.add |e| {eval(evalText.text)}
     return EdgePane
     {
-      left = InsetPane(0, 5, 0, 5)
+      top = EdgePane
       {
-        EdgePane
+        left = GridPane
         {
-          top = EdgePane
+          numCols = 1
+          Button
           {
-            left = GridPane
-            {
-              numCols = 1
-              Button
-              {
-                it.image = syncIcon
-                it.onAction.add |e| {sync}
-              },
-            }
-            right = /*GridPane
-            {
-              numCols = 2*/
-              Button
-              {
-                // TODO: set selected according to Cur Status of actor
-                it.selected = autoStatus()
-                it.text = "AutoSync"
-                it.mode = ButtonMode.toggle
-                it.onAction.add |e| {autoSync()}
-              }/*,
-              Label{image = syncIcon},
-            }*/
-          }
-          center = makeFileNav(frame)
-        },
-      }
-      center = InsetPane(0, 5, 0, 0)
-      {
-        EdgePane
+            it.image = syncIcon
+            it.onAction.add |e| {sync}
+          },
+        }
+        right = /*GridPane
         {
-          center = View.makeBest(frame, file)
-          bottom = EdgePane{left = Label{it.text="Eval:"}; center = evalText}
-        },
+          numCols = 2*/
+          Button
+          {
+            // TODO: set selected according to Cur Status of actor
+            it.selected = autoStatus()
+            it.text = "AutoSync"
+            it.mode = ButtonMode.toggle
+            it.onAction.add |e| {autoSync()}
+          }/*,
+          Label{image = syncIcon},
+        }*/
       }
+      center = nav.items
     }
   }
 
-  private Widget makeFileNav(Frame frame)
+  override Void updateView(View newView)
   {
-    items := [,]
-    findItems(dir, items)
-    list := ItemList(frame, items, 280)
-    items.eachWhile |item, index -> Bool?|
-    {
-      if(item.toStr == Item.makeFile(file).toStr)
-      {
-        list.highlight = item
-        list.scrollToLine(index>=5 ? index-5 : 0)
-        return true
-      }
-      return null
-    }
-    return list
-  }
-
-  private Void findItems(File dir, Item[] results)
-  {
-    dir.listFiles.sort |a, b| {a.name  <=> b.name}.each |f|
-    {
-      results.add(AxonItem.fromFile(f))
-    }
+    dest := (viewParent.content as EdgePane)
+    dest.center = newView
+    view = newView
+    dest.relayout
   }
 
   ** Enable / disable autosync
@@ -184,9 +133,9 @@ const class AxonSpace : Space
   }
 
   ** log to console
-  Void log(Str msg)
+  static Void log(Str msg)
   {
-    sys.frame.console.append([Item(msg)])
+    Sys.cur.frame.console.append([Item(msg)])
   }
 
   ** Sync the local project with the server
@@ -207,7 +156,7 @@ const class AxonSpace : Space
         {
           info := obj as AxonSyncInfo
           if( ! info.createdFiles.isEmpty)
-            sys.frame.reload // to refresh nav view
+            nav.refresh
         }
         else
           showActorResults(obj)
@@ -267,13 +216,14 @@ const class AxonSpace : Space
     result := syncActor.send(data).get
     showActorResults(result, true)
     if(result == true)
-      pass = Dialog.openPromptStr(sys.frame, "Password for project $dir.name:")
+      pass = Dialog.openPromptStr(frame, "Password for project $dir.name:")
     return pass
   }
 
   ** Display call results to user
   ** Can display error messages and sync thead infos as well
-  Void showActorResults(Obj? result, Bool errorOnly := false)
+  ** Note: keep static so it's immutable
+  static Void showActorResults(Obj? result, Bool errorOnly := false)
   {
     if(result == null) return
     if(errorOnly && ! (result is Err)) return
@@ -288,7 +238,7 @@ const class AxonSpace : Space
       {
         items.add(Item{it.dis = line; it.icon = errorIcon})
       }
-      sys.frame.console.append(items)
+      Sys.cur.frame.console.append(items)
     }
     else if(result is Grid)
     {
@@ -301,10 +251,10 @@ const class AxonSpace : Space
         {
           items.add(Item{it.dis = line; it.icon = errorIcon})
         }
-        sys.frame.console.append(items)
+        Sys.cur.frame.console.append(items)
       }
       else
-        sys.frame.console.append([AxonItem.fromGrid(g, this)])
+        Sys.cur.frame.console.append([AxonItem.fromGrid(g)])
     }
     else if(result is Str)
     {

@@ -1,7 +1,7 @@
 // History:
 //   12 4 12 - Thibaut Colar Creation
 
-using haystack
+//using haystack
 using camembert
 using netColarUtils
 using fwt
@@ -37,6 +37,7 @@ class AxonConn
     {
       client = Client.open(`http://$host/api/$project`, user, password)
     }
+    echo("Server version: $client.version")
   }
 
   Void save(File to)

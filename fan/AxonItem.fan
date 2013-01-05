@@ -2,7 +2,7 @@
 //   12 12 12 Thibaut Colar Creation
 
 using camembert
-using haystack
+//using haystack
 using gfx
 using fwt
 
@@ -10,12 +10,12 @@ using fwt
 ** AxonItem
 ** Custom item for axon files /results items
 **
-const class AxonItem : Item
+class AxonItem : Item
 {
   static const Image gridIcon := Image(`fan://icons/x16/chartArea.png`)
   static const Image funcIcon := Image(`fan://icons/x16/func.png`)
 
-  const Unsafe? grid
+  Unsafe? grid
 
   new make(|This|? f) : super(f) {}
 
@@ -31,11 +31,10 @@ const class AxonItem : Item
     }
   }
 
-  static AxonItem fromGrid(Grid grid, AxonSpace space)
+  static AxonItem fromGrid(Grid grid)
   {
     AxonItem
     {
-      it.space = space
       it.grid = Unsafe(grid)
       it.icon = gridIcon
       it.dis = "Result Grid ($grid.size rows, $grid.cols.size cols). Click to view."
@@ -69,14 +68,14 @@ const class AxonItem : Item
       {
         it.text = "Find in \"$file.name\""
         it.onAction.add |e|
-          { (frame.sys.commands.find as FindCmd).find(file) }
+          { (Sys.cur.commands.find as FindCmd).find(file) }
       },
       MenuItem
       {
         dir := file.isDir ? file : file.parent
         it.text = "New file in \"$dir.name\""
         it.onAction.add |e|
-          { (frame.sys.commands.newFile as NewFileCmd).newFile(dir, "mewFunc.axon", frame) }
+          { (Sys.cur.commands.newFile as NewFileCmd).newFile(dir, "mewFunc.axon", frame) }
       },
 
       MenuItem
@@ -84,7 +83,7 @@ const class AxonItem : Item
         it.text = "Delete \"$file.name\""
         it.onAction.add |e|
         {
-          (frame.sys.commands.delete as DeleteFileCmd).delFile(file, frame)
+          (Sys.cur.commands.delete as DeleteFileCmd).delFile(file, frame)
           askServerDelete(frame, file, "Delete")
           frame.goto(this) // refresh
         }
@@ -94,7 +93,7 @@ const class AxonItem : Item
         it.text = "Rename/Move \"$file.name\""
         it.onAction.add |e|
         {
-          (frame.sys.commands.move as MoveFileCmd).moveFile(file, frame)
+          (Sys.cur.commands.move as MoveFileCmd).moveFile(file, frame)
           askServerDelete(frame, file, "Rename")
           frame.goto(this) // refresh
         }
