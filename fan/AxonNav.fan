@@ -5,7 +5,7 @@ using camembert
 
 class AxonNav : Nav
 {
-  override ItemList items
+  override ItemList list
   override File root
 
   // TODO: make a setting collapseLimit
@@ -18,7 +18,7 @@ class AxonNav : Nav
     root = dir
     files := [Item(dir)]
     findItems(dir, files)
-    items = ItemList(frame, files, listWidth)
+    list = ItemList(frame, files, listWidth)
     highlight(curItem.file)
   }
 }

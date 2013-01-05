@@ -84,7 +84,7 @@ class AxonSpace : BaseSpace
           Button
           {
             it.image = syncIcon
-            it.onAction.add |e| {sync}
+            it.onAction.add |e| {sync(syncActor, dir)}
           },
         }
         right = /*GridPane
@@ -101,7 +101,7 @@ class AxonSpace : BaseSpace
           Label{image = syncIcon},
         }*/
       }
-      center = nav.items
+      center = nav.list
     }
   }
 
@@ -122,7 +122,7 @@ class AxonSpace : BaseSpace
       data := AxonActorData {action=AxonActorAction.autoOn}
       result := syncActor.send(data).get
       log("Auto sync -> on")
-      sync // kick off sync
+      sync(syncActor, dir) // kick off sync
     }
     else
     {
@@ -133,15 +133,17 @@ class AxonSpace : BaseSpace
   }
 
   ** log to console
+  ** NEEDS TO BE IMMUTABLE - SED IN CALLBACK
   static Void log(Str msg)
   {
     Sys.cur.frame.console.append([Item(msg)])
   }
 
   ** Sync the local project with the server
-  Void sync()
+  ** NEEDS TO BE IMMUTABLE
+  static Void sync(AxonSyncActor syncActor, File dir)
   {
-    pass := getPass
+    pass := getPass(syncActor, dir)
     if(pass == null)
       return // cancelled
 
@@ -156,7 +158,7 @@ class AxonSpace : BaseSpace
         {
           info := obj as AxonSyncInfo
           if( ! info.createdFiles.isEmpty)
-            nav.refresh
+            Sys.cur.frame.curSpace.nav.refresh
         }
         else
           showActorResults(obj)
@@ -176,7 +178,7 @@ class AxonSpace : BaseSpace
   ** TODO: run async ... but UI refresh are tricky (Not on UI thread business)
   Void eval(Str toEval)
   {
-    pass := getPass
+    pass := getPass(syncActor, dir)
     if(pass == null)
       return // cancelled
 
@@ -192,7 +194,7 @@ class AxonSpace : BaseSpace
 
   Void remoteDelete(Str funcName)
   {
-    pass := getPass
+    pass := getPass(syncActor, dir)
     if(pass == null)
       return // cancelled
 
@@ -209,20 +211,21 @@ class AxonSpace : BaseSpace
 
   ** Get the connection password. Ask user for it if we don't have it yet
   ** Returns null if cancel was pressed on dialog
-  Str? getPass()
+  ** NEEDS TO BE IMMUTABLE - SED IN CALLBACK
+  static Str? getPass(AxonSyncActor syncActor, File dir)
   {
     Str? pass := ""
     data := AxonActorData {action=AxonActorAction.needsPassword; password=pass}
     result := syncActor.send(data).get
     showActorResults(result, true)
     if(result == true)
-      pass = Dialog.openPromptStr(frame, "Password for project $dir.name:")
+      pass = Dialog.openPromptStr(Sys.cur.frame, "Password for project $dir.name:")
     return pass
   }
 
   ** Display call results to user
   ** Can display error messages and sync thead infos as well
-  ** Note: keep static so it's immutable
+  ** NEEDS TO BE IMMUTABLE - SED IN CALLBACK
   static Void showActorResults(Obj? result, Bool errorOnly := false)
   {
     if(result == null) return
