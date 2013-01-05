@@ -10,12 +10,12 @@ using fwt
 ** AxonItem
 ** Custom item for axon files /results items
 **
-class AxonItem : Item
+const class AxonItem : FileItem
 {
   static const Image gridIcon := Image(`fan://icons/x16/chartArea.png`)
   static const Image funcIcon := Image(`fan://icons/x16/func.png`)
 
-  Unsafe? grid
+  const Unsafe? grid
 
   new make(|This|? f) : super(f) {}
 
@@ -25,9 +25,21 @@ class AxonItem : Item
     {
       it.file = file
       it.dis = file.name
-      it.icon = (file.ext == "axon" || file.isDir) ?
+      it.icon = (file.ext == "axon") ?
              funcIcon
            : Theme.fileToIcon(file)
+      it.isProject = false
+    }
+  }
+
+  static AxonItem fromProject(File file)
+  {
+    AxonItem
+    {
+      it.file = file
+      it.dis = file.name
+      it.icon = funcIcon
+      it.isProject = true
     }
   }
 

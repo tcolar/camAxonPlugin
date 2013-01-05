@@ -9,14 +9,14 @@ class AxonNav : Nav
   override File root
 
   // TODO: make a setting collapseLimit
-  new make(Frame frame, File dir, NavItemBuilder navBuilder, Item? curItem)
+  new make(Frame frame, File dir, NavItemBuilder navBuilder, FileItem? curItem)
     : super(collapseLimit, navBuilder)
   {
     this.collapseLimit = 9999
     listWidth := 270
 
     root = dir
-    files := [Item(dir)]
+    files := [AxonItem.fromFile(dir)]
     findItems(dir, files)
     list = ItemList(frame, files, listWidth)
     highlight(curItem.file)

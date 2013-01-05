@@ -34,7 +34,7 @@ class AxonSpace : BaseSpace
     syncActor = acts.forProject(dir)
 
     view = View.makeBest(frame, this.file)
-    nav = AxonNav(frame, dir, AxonItemBuilder(), Item(this.file))
+    nav = AxonNav(frame, dir, AxonItemBuilder(this), AxonItem.fromFile(this.file))
 
     navParent.content = navPane(nav)
 
@@ -64,7 +64,7 @@ class AxonSpace : BaseSpace
       props.get("file")?.toUri?.toFile)
   }
 
-  override Int match(Item item)
+  override Int match(FileItem item)
   {
     // add 1000 so always preferred over filespace
     if (!FileUtil.contains(this.dir, item.file))

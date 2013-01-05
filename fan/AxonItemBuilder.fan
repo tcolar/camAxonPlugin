@@ -8,6 +8,10 @@ using camembert
 **
 class AxonItemBuilder : NavItemBuilder
 {
+  override Space space
+
+  new make(Space space) {this.space = space}
+
   override  Item forFile(File f, Str path, Int indent)
   {
     return AxonItem.fromFile(f)
@@ -20,6 +24,6 @@ class AxonItemBuilder : NavItemBuilder
 
   override  Item forProj(File f, Str path, Int indent)
   {
-    return AxonItem.fromFile(f)
+    return AxonItem.fromProject(f)
   }
 }

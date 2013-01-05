@@ -53,11 +53,7 @@ const class AxonPlugin : Plugin
       return null
 
     if(dir.isDir && dir.plus(AxonConn.fileName).exists)
-    {
-      item := AxonItem.fromFile(dir)
-      item.isProject = true
-      return item
-    }
+      return AxonItem.fromProject(dir)
     return null
   }
 
