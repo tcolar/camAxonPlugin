@@ -24,8 +24,8 @@ class AxonSpace : BaseSpace
   static const Image helpIcon := Image(`fan://icons/x16/question.png`)
   static const Image errorIcon := Image(`fan://icons/x16/err.png`)
 
-  new make(Frame frame, File dir, File? file) :
-      super(frame, dir.name, dir.normalize, file?: dir + AxonConn.fileName)
+  new make(Frame frame, File dir, File? file := null) :
+      super(frame, dir.name, dir.normalize, file)
   {
     if( ! License(License.licFile).valid)
       throw Err("Invalid license")
@@ -34,7 +34,7 @@ class AxonSpace : BaseSpace
     syncActor = acts.forProject(dir)
 
     view = View.makeBest(frame, this.file)
-    nav = AxonNav(frame, dir, AxonItemBuilder(this), AxonItem.fromFile(this.file))
+    nav = AxonNav(frame, dir, AxonItemBuilder(this), AxonItem.makeFile(this.file))
 
     navParent.content = navPane(nav)
 
@@ -47,7 +47,7 @@ class AxonSpace : BaseSpace
     evalText.onAction.add |e| {eval(evalText.text)}
     viewParent.content = EdgePane
     {
-      center = View.makeBest(frame, file)
+      center = file == null ? null : View.makeBest(frame, file)
       bottom = EdgePane{left = Label{it.text="Eval:"}; center = evalText}
     }
   }
@@ -239,7 +239,7 @@ class AxonSpace : BaseSpace
       items := [,]
       e.traceToStr.splitLines.each |line|
       {
-        items.add(Item{it.dis = line; it.icon = errorIcon})
+        items.add(Item.makeStr(line).setIcon(errorIcon))
       }
       Sys.cur.frame.console.append(items)
     }
@@ -252,12 +252,12 @@ class AxonSpace : BaseSpace
         items := [,]
         (meta["errTrace"] as Str)?.splitLines?.each |line|
         {
-          items.add(Item{it.dis = line; it.icon = errorIcon})
+          items.add(Item.makeStr(line).setIcon(errorIcon))
         }
         Sys.cur.frame.console.append(items)
       }
       else
-        Sys.cur.frame.console.append([AxonItem.fromGrid(g)])
+        Sys.cur.frame.console.append([AxonGridItem.makeGrid(g)])
     }
     else if(result is Str)
     {

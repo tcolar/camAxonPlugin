@@ -12,6 +12,7 @@ using fwt
   new make(Window? parent) : super(parent)
   {
     title = "Licensing"
+    commands = [,]
   }
 
   ** Update from license
@@ -112,6 +113,7 @@ using fwt
     dialog = Dialog(parent)
     {
       it.title = "License request"
+      it.commands = [,]
       it.body = EdgePane
       {
         center = GridPane

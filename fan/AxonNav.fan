@@ -16,7 +16,7 @@ class AxonNav : Nav
     listWidth := 270
 
     root = dir
-    files := [AxonItem.fromFile(dir)]
+    files := [AxonItem.makeFile(dir)]
     findItems(dir, files)
     list = ItemList(frame, files, listWidth)
     highlight(curItem.file)

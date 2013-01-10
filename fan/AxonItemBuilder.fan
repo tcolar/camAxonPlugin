@@ -14,16 +14,16 @@ class AxonItemBuilder : NavItemBuilder
 
   override  Item forFile(File f, Str path, Int indent)
   {
-    return AxonItem.fromFile(f)
+    return AxonItem.makeFile(f)
   }
 
   override  Item forDir(File f, Str path, Int indent, Bool collapsed)
   {
-    return AxonItem.fromFile(f)
+    return AxonItem.makeFile(f)
   }
 
   override  Item forProj(File f, Str path, Int indent)
   {
-    return AxonItem.fromProject(f)
+    return AxonItem.makeProject(f)
   }
 }

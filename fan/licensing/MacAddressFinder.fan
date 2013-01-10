@@ -57,14 +57,16 @@ internal class MacAddressFinder
       if(macAddress.type == "G") return macAddress
       return null
     }
+    if(good != null) return good
     // vmware
     good = good ?: all.eachWhile |MacAddress macAddress, int -> MacAddress?|
     {
       if(macAddress.type == "V") return macAddress
       return null
     }
+    if(good != null) return good
     // missing
-    return good ?: MacAddress("000000000000")
+    return MacAddress("000000000000")
  }
 
   ** Find mac addresses from the process output

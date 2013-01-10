@@ -14,7 +14,7 @@ class Build : BuildPod
                "util 1.0+",
                "web 1.0+",
                "camembert 1.1.0+",
-               "netColarUtils 1.0.0+",
+               "netColarUtils 1.0.3+",
                "netColarUI 1.0.0+",
                // haystack 2.0+ required
                //"haystack 2.0+" -> using bundled version for now

@@ -50,7 +50,7 @@ const class NewAxonPrj : Cmd
 
     conn.save(f)
 
-    item := AxonItem.fromFile(f)
+    item := AxonItem.makeFile(f)
 
     frame.goto(item)
   }
@@ -63,6 +63,7 @@ const class LicensingCmd : Cmd
   override const Str name := "Licensing"
   override Void invoke(Event event)
   {
+    echo("frame $frame file: ${License.licFile}")
     LicenseWindow(frame).update(License.licFile).open
   }
 

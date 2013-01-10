@@ -17,7 +17,6 @@ internal class License
 
   new make(File file)
   {
-    this.file = file
     status =  LicenseStatus.none
 
     if(! file.exists)

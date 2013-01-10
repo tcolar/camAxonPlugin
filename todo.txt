@@ -2,15 +2,6 @@ Grid results -> zync tab, Save as feature
 
 sparks editor ? (readAll(rule)) + backup ?
 
-Temp license :
-- trila version
-- purchase -> good for 1 year with free upgarades
-- check at startup that valid & not expired
-- License window  -> show license status
-- -> request license (trial/full)
-- -> update license
-
--> server side : enable /disbale
 
 
 

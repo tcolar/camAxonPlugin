@@ -10,61 +10,27 @@ using fwt
 ** AxonItem
 ** Custom item for axon files /results items
 **
-const class AxonItem : FileItem
+@Serializable
+class AxonItem : FileItem
 {
-  static const Image gridIcon := Image(`fan://icons/x16/chartArea.png`)
   static const Image funcIcon := Image(`fan://icons/x16/func.png`)
 
-  const Unsafe? grid
-
-  new make(|This|? f) : super(f) {}
-
-  static AxonItem fromFile(File file)
+  new makeFile(File file) : super.makeFile(file)
   {
-    AxonItem
-    {
-      it.file = file
-      it.dis = file.name
-      it.icon = (file.ext == "axon") ?
-             funcIcon
-           : Theme.fileToIcon(file)
-      it.isProject = false
-    }
+    this.dis = file.name
+    this.icon = (file.ext == "axon") ?
+           funcIcon
+         : Theme.fileToIcon(file)
   }
 
-  static AxonItem fromProject(File file)
+  new makeProject(File file) : super.makeProject(file)
   {
-    AxonItem
-    {
-      it.file = file
-      it.dis = file.name
-      it.icon = funcIcon
-      it.isProject = true
-    }
-  }
-
-  static AxonItem fromGrid(Grid grid)
-  {
-    AxonItem
-    {
-      it.grid = Unsafe(grid)
-      it.icon = gridIcon
-      it.dis = "Result Grid ($grid.size rows, $grid.cols.size cols). Click to view."
-    }
-  }
-
-  override Void selected(Frame frame)
-  {
-    if(grid != null)
-      HaystackGridDisplayer(grid.val, frame).open
-    else
-      super.selected(frame)
+    this.dis = file.name
+    this.icon = funcIcon
   }
 
   override Menu? popup(Frame frame)
   {
-    if (file == null) return null
-
     if (file.ext != "axon") return super.popup(frame)
 
     // Menu for Axon items

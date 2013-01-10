@@ -31,30 +31,30 @@ const class AxonPlugin : Plugin
     (frame.menuBar as MenuBar).plugins.add(AxonMenu(frame))
   }
 
-  override Space? createSpace(File file)
+  override FileItem[] projects()
+  {
+     return [,]
+  }
+
+  override Space? createSpace(File prj)
   {
     if( ! licOk)
       return null
 
-    File dir := file.isDir ? file : file.parent
-    if(file.ext == "axon" ||
-        file.name == AxonConn.fileName.toStr ||
-        dir.plus(AxonConn.fileName).exists
-      )
-        return AxonSpace(Sys.cur.frame, dir, file)
+    if(prj.isDir && prj.plus(AxonConn.fileName).exists)
+      return AxonSpace(Sys.cur.frame, prj)
     return null
   }
 
-  override Int? spacePriority() { 75 }
-
-  override Item? projectItem(File dir, Int indent)
+  override Int spacePriority(File prjDir)
   {
     if( ! licOk)
-      return null
+      return 0
 
-    if(dir.isDir && dir.plus(AxonConn.fileName).exists)
-      return AxonItem.fromProject(dir)
-    return null
+    if(prjDir.isDir && prjDir.plus(AxonConn.fileName).exists)
+      return 75
+
+    return 0
   }
 
   override Void onShutdown()

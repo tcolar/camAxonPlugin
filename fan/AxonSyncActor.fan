@@ -39,8 +39,9 @@ const class AxonSyncActor : Actor
     catch(Err e)
     {
       log(e, data)
-      if(e is IOErr)
+      if(e is IOErr || e.typeof.pod?.name == "sys") // for skysaprk errors don't diconnect
       {
+        log("Unexpected error, trying to reconnect.", data)
         reconnect(data)
       }
       return e
