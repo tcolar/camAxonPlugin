@@ -13,13 +13,13 @@ class Build : BuildPod
                "fwt 1.0",
                "util 1.0+",
                "web 1.0+",
-               "camembert 1.1.3+",
+               "dom 1.0+",
                "netColarUtils 1.0.5+",
                "netColarUI 1.0.0+",
-               "camFantomPlugin 1.1.3+",
-               "dom 1.0+",
+               "camFantomPlugin 1.1.4+",
+               "camembert 1.1.4+",
                ]
-    version = Version("0.1.3")
+    version = Version("0.1.4")
     srcDirs = [`fan/`, `fan/licensing/`, `fan/haystack/`]
     resDirs = [,]
     meta    = ["license.name" : "Free Trial / Commercial",
