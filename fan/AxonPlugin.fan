@@ -10,6 +10,8 @@ using camFantomPlugin
 **
 const class AxonPlugin : Plugin
 {
+  const AxonDocs docProv := AxonDocs()
+
   const Unsafe actors := Unsafe(AxonActors())
 
   const Unsafe license
@@ -20,6 +22,8 @@ const class AxonPlugin : Plugin
   }
 
   override PluginCommands? commands() {null} // no build / run commands
+
+  override PluginDocs? docProvider() {docProv}
 
   override Void onInit(File configDir)
   {
