@@ -6,25 +6,24 @@ class Build : BuildPod
   new make()
   {
     podName = "camAxonPlugin"
-    summary = "Axon projects support plugin for camembert (Skyspark Axon projects)"
+    summary = "(Alpha) Axon projects support plugin for camembert (Skyspark Axon projects)"
     depends = ["sys 1.0",
                "concurrent 1.0",
                "gfx 1.0",
                "fwt 1.0",
                "util 1.0+",
                "web 1.0+",
-               "camembert 1.1.0+",
-               "netColarUtils 1.0.3+",
+               "camembert 1.1.3+",
+               "netColarUtils 1.0.5+",
                "netColarUI 1.0.0+",
-               // haystack 2.0+ required
-               //"haystack 2.0+" -> using bundled version for now
+               "camFantomPlugin 1.1.3+",
                "dom 1.0+",
                ]
-    version = Version("1.0.0")
+    version = Version("0.1.3")
     srcDirs = [`fan/`, `fan/licensing/`, `fan/haystack/`]
     resDirs = [,]
     meta    = ["license.name" : "Free Trial / Commercial",
-                "org.name"   : "Status 302 LLC",
+                "org.uri"   : "http://www.status302.com/",
                 "camembert.plugin" : "AxonPlugin"]
     docSrc  = true
   }

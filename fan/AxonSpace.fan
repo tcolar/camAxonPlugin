@@ -25,7 +25,7 @@ class AxonSpace : BaseSpace
   static const Image errorIcon := Image(`fan://icons/x16/err.png`)
 
   new make(Frame frame, File dir, File? file := null) :
-      super(frame, dir.name, dir.normalize, file)
+      super(frame, dir.normalize, file)
   {
     if( ! License(License.licFile).valid)
       throw Err("Invalid license")
@@ -74,9 +74,9 @@ class AxonSpace : BaseSpace
 
   Pane navPane(Nav nav)
   {
-    return EdgePane
+    return BgEdgePane
     {
-      top = EdgePane
+      top = BgEdgePane
       {
         left = GridPane
         {

@@ -22,8 +22,8 @@ class AxonItemBuilder : NavItemBuilder
     return AxonItem.makeFile(f)
   }
 
-  override  Item forProj(File f, Str path, Int indent)
+  override  Item forProj(Project prj, Str path, Int indent)
   {
-    return AxonItem.makeProject(f)
+    return AxonItem.makeProject(prj)
   }
 }

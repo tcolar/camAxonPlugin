@@ -2,6 +2,9 @@ Grid results -> zync tab, Save as feature
 
 sparks editor ? (readAll(rule)) + backup ?
 
+support for server that does not require authentication like vgproj
+
+import/doanload/create jobs ?
 
 
 

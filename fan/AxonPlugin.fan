@@ -1,6 +1,9 @@
 // History:
 //   11 8 12 Creation
+
 using camembert
+using netColarUtils
+using camFantomPlugin
 
 **
 ** AxonPlugin
@@ -16,48 +19,63 @@ const class AxonPlugin : Plugin
     license = Unsafe(License(License.licFile))
   }
 
-  override Void onInit()
+  override PluginCommands? commands() {null} // no build / run commands
+
+  override Void onInit(File configDir)
   {
     // create axon template if not there yet
-    axon := File(`${Options.standard.parent}/axon.tpl`)
-    if(! axon.exists)
-    {
-      axon.create.out.print("/*\nHistory: {date} {user} Creation\n*/\n\n() => do\n  //TODO\nend\n").close
-    }
+    axon := configDir + `templates/axon_function.json`
+    if( ! axon.exists)
+      JsonUtils.save(axon.out, Template{it.name="Axon function"
+        it.extensions=["axon"]
+        it.text="/*\nHistory: {date} {user} Creation\n*/\n\n() => do\n  //TODO\nend\n"})
   }
 
-  override Void onFrameReady(Frame frame)
+  override Void onFrameReady(Frame frame, Bool initial := true)
   {
-    (frame.menuBar as MenuBar).plugins.add(AxonMenu(frame))
+    plugins := (frame.menuBar as MenuBar).plugins
+    plugins.remove(plugins.children.find{it->text == "Axon"})
+    plugins.add(AxonMenu(frame))
   }
 
-  override FileItem[] projects()
-  {
-     return [,]
-  }
-
-  override Space? createSpace(File prj)
+  override const |Uri -> Project?| projectFinder:= |Uri uri -> Project?|
   {
     if( ! licOk)
       return null
 
-    if(prj.isDir && prj.plus(AxonConn.fileName).exists)
-      return AxonSpace(Sys.cur.frame, prj)
+    f := uri.toFile
+    if(f.isDir && (f + `_axon_conn.props`).exists)
+    {
+      return Project{
+        it.dis = f.name
+        it.dir = f.uri
+        it.icon = AxonSpace.funcIcon
+        it.plugin = this.typeof.pod.name
+      }
+    }
     return null
   }
 
-  override Int spacePriority(File prjDir)
+  override Space createSpace(Project prj)
+  {
+    if( ! licOk)
+      return FileSpace(Sys.cur.frame, prj.dir.toFile)
+
+    return AxonSpace(Sys.cur.frame, prj.dir.toFile, (prj.dir + `_axon_conn.props`).toFile)
+  }
+
+  override Int spacePriority(Project prj)
   {
     if( ! licOk)
       return 0
 
-    if(prjDir.isDir && prjDir.plus(AxonConn.fileName).exists)
-      return 75
+    if(prj.plugin != this.typeof.pod.name)
+      return 0
 
-    return 0
+    return 75
   }
 
-  override Void onShutdown()
+  override Void onShutdown(Bool isKill := false)
   {
     AxonActors act := actors.val
     act.actors.vals.each |a| {a.pool.stop}

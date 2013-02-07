@@ -23,9 +23,9 @@ class AxonItem : FileItem
          : Theme.fileToIcon(file)
   }
 
-  new makeProject(File file) : super.makeProject(file)
+  new makeProject(Project prj) : super.makeProject(prj.dir.toFile)
   {
-    this.dis = file.name
+    this.dis = prj.dis
     this.icon = funcIcon
   }
 

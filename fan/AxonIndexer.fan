@@ -3,6 +3,7 @@
 
 //using haystack
 using camembert
+using camFantomPlugin
 
 **
 ** AxonIndexer : Index/parse axon data(trio funcs and tags)
