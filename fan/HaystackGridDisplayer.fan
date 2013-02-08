@@ -5,6 +5,7 @@ using fwt
 //using haystack
 using gfx
 using netColarUI
+using camembert
 
 **
 ** HaytackGridDisplayer
@@ -13,22 +14,45 @@ using netColarUI
 class HaystackGridDisplayer
 {
   private Window win
+  private Grid grid
+  private Frame frame
 
-  new make(Grid g, Window parent)
+  new make(Grid g, Frame frame)
   {
-    win = Window(parent)
+    win = Window(frame)
     {
+      this.frame = frame
+      this.grid = g
       size = Size(parent.size.w-50, parent.size.h-50)
       title = "Grid results"
       content  = InsetPane{
-        content = ScrollPane{
-          content = Table
-          {
-            model = HaystackGridModel(g)
-            onAction.add |Event e| {showRow(e, g)}
+        content = EdgePane
+        {
+          center = ScrollPane{
+            content = Table
+            {
+              model = HaystackGridModel(g)
+              onAction.add |Event e| {showRow(e, g)}
+            }
+          }
+          bottom = GridPane{
+            Button{
+              it.text = "Save to file"
+              it.onAction.add |e| {save}
+            },
           }
         }
       }
+    }
+  }
+
+  Void save()
+  {
+    file := frame.curSpace.root + `grid.zinc`
+    to := Dialog.openPromptStr(frame, "Save as:", "$file")
+    if(to != null)
+    {
+      zw := ZincWriter(to.toUri.toFile.out, "2").writeGrid(grid).flush.close
     }
   }
 
