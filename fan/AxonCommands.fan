@@ -52,6 +52,9 @@ const class NewAxonPrj : Cmd
 
     item := AxonItem.makeFile(f)
 
+    // add to registry so it will be recognized as aproject right away
+    ProjectRegistry.register(destDir)
+
     frame.goto(item)
   }
 

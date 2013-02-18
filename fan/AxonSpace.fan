@@ -154,11 +154,13 @@ class AxonSpace : BaseSpace
       password = pass
       callback = |Obj? obj|
       {
-        if(obj is AxonSyncInfo)
+        if(obj != null && obj is AxonSyncInfo)
         {
           info := obj as AxonSyncInfo
           if( ! info.createdFiles.isEmpty)
-            Sys.cur.frame.curSpace.nav.refresh
+          {
+            Sys.cur.frame.curSpace.nav.refresh(dir)
+          }
         }
         else
           showActorResults(obj)

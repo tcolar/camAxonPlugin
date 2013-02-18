@@ -103,9 +103,10 @@ const class AxonSyncActor : Actor
         return result
 
       case(AxonActorAction.sync):
+        AxonSyncInfo? info
         auto := Actor.locals.containsKey("camAxon.auto")
         try
-          sync(conn, data)
+          info = sync(conn, data)
         catch(Err syncErr)
         {
           log(syncErr, data)
@@ -113,7 +114,7 @@ const class AxonSyncActor : Actor
         }
         if(auto)
           sendLater(2sec, data) // autosync
-        return null
+        return info
 
       default:
         throw Err("Unexpected action: $action !")
@@ -131,7 +132,7 @@ const class AxonSyncActor : Actor
       c.password = password
       c.connect
       Actor.locals["camAxon.conn"] = c
-      log("Connected !", data)
+      log("Connected ! (Version: ${c.client?.version})", data)
     }
   }
 
