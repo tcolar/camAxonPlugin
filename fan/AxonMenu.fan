@@ -20,16 +20,7 @@ class AxonMenu : Menu
   {
     removeAll
 
-    license := License(License.licFile)
-    if(license.valid)
-    {
-      add(MenuItem{ it.command = NewAxonPrj{}.asCommand })
-    }
-    else
-    {
-    }
-    add(MenuItem{ it.command = LicensingCmd{}.asCommand })
-    add(MenuItem{ it.command = AboutCmd{}.asCommand })
+    add(MenuItem{ it.command = NewAxonPrj{}.asCommand })
   }
 }
 

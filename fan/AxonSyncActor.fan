@@ -17,9 +17,6 @@ const class AxonSyncActor : Actor
 
   new make(File folder) : super(ActorPool())
   {
-    if( ! License(License.licFile).valid)
-      throw Err("Invalid license")
-
     this.projectFolder = folder
     dataFile = projectFolder + `_sync_items.obj`
     logFile = projectFolder + `_sync.log`

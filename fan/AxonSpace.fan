@@ -27,9 +27,6 @@ class AxonSpace : BaseSpace
   new make(Frame frame, File dir, File? file := null) :
       super(frame, dir.normalize, file)
   {
-    if( ! License(License.licFile).valid)
-      throw Err("Invalid license")
-
     AxonActors acts := Sys.cur.plugins[Pod.of(this).name]->actors->val
     syncActor = acts.forProject(dir)
 

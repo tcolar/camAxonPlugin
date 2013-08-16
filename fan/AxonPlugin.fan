@@ -14,13 +14,6 @@ const class AxonPlugin : Plugin
 
   const Unsafe actors := Unsafe(AxonActors())
 
-  const Unsafe license
-
-  new make()
-  {
-    license = Unsafe(License(License.licFile))
-  }
-
   override PluginCommands? commands() {null} // no build / run commands
 
   override PluginDocs? docProvider() {docProv}
@@ -44,9 +37,6 @@ const class AxonPlugin : Plugin
 
   override const |Uri -> Project?| projectFinder:= |Uri uri -> Project?|
   {
-    if( ! licOk)
-      return null
-
     f := uri.toFile
     if(f.isDir && (f + `_axon_conn.props`).exists)
     {
@@ -62,17 +52,11 @@ const class AxonPlugin : Plugin
 
   override Space createSpace(Project prj)
   {
-    if( ! licOk)
-      return FileSpace(Sys.cur.frame, prj.dir.toFile)
-
     return AxonSpace(Sys.cur.frame, prj.dir.toFile, (prj.dir + `_axon_conn.props`).toFile)
   }
 
   override Int spacePriority(Project prj)
   {
-    if( ! licOk)
-      return 0
-
     if(prj.plugin != this.typeof.pod.name)
       return 0
 
@@ -88,16 +72,6 @@ const class AxonPlugin : Plugin
   ** Called via Dynamic call
   Str:TrioInfo trioData(File[] podDirs)
   {
-    if( ! licOk)
-      return [:]
-
     return AxonIndexer().trioData(podDirs)
-  }
-
-  private Bool licOk()
-  {
-    lic := license.val as License
-    if(lic == null) return false
-    return lic.valid
   }
 }
