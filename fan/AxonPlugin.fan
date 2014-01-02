@@ -18,6 +18,8 @@ const class AxonPlugin : Plugin
 
   override PluginDocs? docProvider() {docProv}
 
+  override Type? envType() {return null}
+
   override Void onInit(File configDir)
   {
     // create axon template if not there yet
